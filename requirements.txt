@@ -1,0 +1,3 @@
+snakehelp
+mapping_benchmarking @ git+https://github.com/bioinf-benchmarking/mapping-benchmarking@master
+bnp_assembly @ git+https://github.com/knutdrand/bnp_assembly@master

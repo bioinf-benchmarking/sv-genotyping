@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+
+# dataclasses is missing from whatshap conda which uses python 3.6
+
+dependencies:
+  - python=3.6
+  - pip
+  - pip:
+      - dataclasses
+  - whatshap

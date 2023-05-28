@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+
+dependencies:
+  - seqtk
+  - python=2.7
+  - pip
+  - pip:
+      - git+https://github.com/ivargr/sim3C

@@ -1,0 +1,39 @@
+
+n_threads: 4
+
+
+genomes:
+  hg38:  # UCSC id of reference genome
+    test
+
+  # yeast
+  sacCer3:
+    small:
+      chromosomes: "chrI"
+    medium:
+      chromosomes: "chrI,chrII,chrIII,chrIV"
+    big:
+      chromosomes: "chrI,chrII,chrIII,chrIV,chrIX,chrV,chrVI,chrVII,chrVIII,chrX,chrXI,chrXII,chrXIII,chrXIV,chrXV,chrXVI,chrM"
+
+  # simulated genome sequence
+  simulated1:
+    genome_size: 10000000
+    n_chromosomes: 10
+
+    simulated:
+      simulated: True
+      small:
+        chromosomes: "chr1,chr2,chr3"
+
+
+
+mason_variator_parameters:
+   "--snp-rate 0.002
+   --small-indel-rate 0.0005
+   --min-small-indel-size 2
+   --max-small-indel-size 25
+   --sv-indel-rate 0
+   --sv-inversion-rate 0
+   --sv-translocation-rate 0
+   --sv-duplication-rate 0
+   "

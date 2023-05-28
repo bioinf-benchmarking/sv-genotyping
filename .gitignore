@@ -1,0 +1,6 @@
+.idea
+.snakemake/
+data/
+out/
+*.fasta
+*.npz

@@ -1,0 +1,9 @@
+
+
+
+real_data:
+  athalia_rosae:
+    hic_reads:
+      - ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR605/001/ERR6054981/ERR6054981_1.fastq.gz
+      - ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR605/001/ERR6054981/ERR6054981_2.fastq.gz
+    hifi_reads: ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR654/000/ERR6548410/ERR6548410.fastq.gz
