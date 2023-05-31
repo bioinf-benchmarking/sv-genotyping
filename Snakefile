@@ -99,6 +99,7 @@ include: "rules/population_simulation.smk"
 include: "rules/read_simulation.smk"
 include: "rules/pangenie.smk"
 include: "rules/evaluation.smk"
+include: "rules/kage.smk"
 
 #print(GenotypeResults.path())
 print(WholeGenomeReads.from_flat_params().file_path())
