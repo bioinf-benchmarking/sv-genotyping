@@ -5,8 +5,8 @@ test_plots: [
 
 # Default parameter groups. Will be used for plotting if not overridden in plot config in plots.yaml
 default_parameter_sets:
-  n_reads: [5000, 10000, 25000, 50000, 75000, 100000]
-  scaffolder: ["bnp_scaffolding", "yahs"]
+  coverage: [1.0, 5.0, 10.0, 20.0]
+  method: ["pangenie", "kage"]
   extra_splits: [5, 10, 25, 50]
 
 
@@ -23,26 +23,9 @@ plots:
   test:
     plot_type: accuracy
     parameters:
-      individual: simulated
-      dataset_size: small
-      n_reads: [5000, 20000, 40000]
-      extra_splits: [5, 10, 20]
-      source: not_assembled  # Not assembled means that hifiasm is not run. Instead, the true genome is artificially split into contigs
-  yeast_real_data:
-    plot_type: accuracy
-    parameters:
-      individual: real
-      dataset_size: big
-      source: not_assembled
-      n_reads: [200000, 1000000]
-      extra_splits: [20, 100]
-  accuracy:
-    plot_type: accuracy
-    parameters:
-      individual: simulated
-      dataset_size: medium
-      source: not_assembled
-      n_reads: [50000, 100000]
+      individual_id: simulated_1
+      size: small
+
 
 # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
@@ -53,8 +36,7 @@ plot_types:
 
   accuracy:
     type: line
-    x: n_reads
-    y: ScaffolderAccuracy
-    color: scaffolder
-    facet_col: extra_splits
+    x: coverage
+    y: GenotypeF1Score
+    color: method
 

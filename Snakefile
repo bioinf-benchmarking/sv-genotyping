@@ -100,9 +100,9 @@ include: "rules/read_simulation.smk"
 include: "rules/pangenie.smk"
 include: "rules/evaluation.smk"
 include: "rules/kage.smk"
+# for plotting
+include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 
-#print(GenotypeResults.path())
-print(WholeGenomeReads.from_flat_params().file_path())
 
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/reference_genome.smk", branch="master")
 #include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/reference_genome.smk"
