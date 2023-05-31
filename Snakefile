@@ -43,8 +43,8 @@ class VariantSource:
 class Population:
     variants: VariantSource
     n_individuals: int = 10
-    allele_frequency: float = 0.1
-    correlation: float = 0.9
+    allele_frequency: float = 0.3
+    correlation: float = 0.8
     file_ending = "/population.vcf"
 
 
@@ -74,7 +74,7 @@ class Reads:
 @parameters
 class GenotypeResults:
     reads: Reads
-    method: Literal["pangenie", "kage"] = "kage"
+    method: Literal["pangenie", "kage", "kage_no_imputation"] = "kage"
     n_threads: int = 1
     file_ending = "/genotypes.vcf"
 
@@ -82,14 +82,17 @@ class GenotypeResults:
 @result
 class GenotypeRecall:
     genotype_results: GenotypeResults
+    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 @result
 class GenotypeOneMinusPrecision:
     genotype_results: GenotypeResults
+    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 @result
 class GenotypeF1Score:
     genotype_results: GenotypeResults
+    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 
 print("Path", GenotypeRecall.path())

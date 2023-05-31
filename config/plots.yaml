@@ -6,8 +6,11 @@ test_plots: [
 # Default parameter groups. Will be used for plotting if not overridden in plot config in plots.yaml
 default_parameter_sets:
   coverage: [1.0, 5.0, 10.0, 20.0]
-  method: ["pangenie", "kage"]
+  method: ["pangenie", "kage", "kage_no_imputation"]
   extra_splits: [5, 10, 25, 50]
+  n_individuals: [5, 25, 50]
+  variant_type: ["snps", "small_indels", "svs"]
+
 
 
 # Axis/titles/etc that will be replaced in plots
@@ -39,4 +42,6 @@ plot_types:
     x: coverage
     y: GenotypeF1Score
     color: method
+    facet_col: n_individuals
+    facet_row: variant_type
 
