@@ -3,9 +3,6 @@ n_threads: 4
 
 
 genomes:
-  hg38:  # UCSC id of reference genome
-    test
-
   # yeast
   sacCer3:
     small:
@@ -14,6 +11,12 @@ genomes:
       chromosomes: "chrI,chrII,chrIII,chrIV"
     big:
       chromosomes: "chrI,chrII,chrIII,chrIV,chrIX,chrV,chrVI,chrVII,chrVIII,chrX,chrXI,chrXII,chrXIII,chrXIV,chrXV,chrXVI,chrM"
+
+  hg38:
+    small:
+      chromosomes: chr21
+    medium:
+      chromosomes: chr1,chr2
 
   # simulated genome sequence
   simulated1:

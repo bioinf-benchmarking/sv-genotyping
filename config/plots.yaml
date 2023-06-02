@@ -7,7 +7,6 @@ test_plots: [
 default_parameter_sets:
   coverage: [1.0, 5.0, 10.0, 20.0]
   method: ["pangenie", "kage", "kage_no_imputation"]
-  extra_splits: [5, 10, 25, 50]
   n_individuals: [5, 25, 50]
   variant_type: ["snps", "small_indels", "svs"]
 
@@ -23,11 +22,26 @@ plots:
   generic:
     # used as a dummy for plots that are not defined
     plot_type: ""
+  small_test:
+    plot_type: accuracy
+    parameters:
+      individual_id: simulated_1
+      size: small
+      coverage: [5.0, 10.0]
+      n_individuals: [5, 10]
+
   test:
     plot_type: accuracy
     parameters:
       individual_id: simulated_1
       size: small
+
+  test2:
+    plot_type: accuracy
+    parameters:
+      size: "medium"
+      coverage: [3.0, 7.0, 15.0, 30.0]
+      n_individuals: [5, 25, 50]
 
 
 # The following defines different type of plots

@@ -40,7 +40,7 @@ rule run_kage_no_impuation:
     output:
         results = GenotypeResults.path(method="kage_no_imputation")
     shell:
-        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads}"
+        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage}"
 
 
 rule run_kage:
@@ -50,5 +50,5 @@ rule run_kage:
     output:
         results = GenotypeResults.path(method="kage")
     shell:
-        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads}"
+        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage}"
 

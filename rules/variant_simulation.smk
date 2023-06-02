@@ -1,8 +1,29 @@
 
-rule test:
-    output:
-        touch("test.txt")
 
+
+rule samtools_index:
+    input:
+        "{sample}.fa",
+    output:
+        "{sample}.fa.fai",
+    wrapper:
+        "v1.21.2/bio/samtools/faidx"
+
+
+rule download_reference:
+    output:
+        ReferenceGenome.path(file_ending="/reference.2bit"),
+    shell:
+        "wget -O {output} https://hgdownload.soe.ucsc.edu/goldenPath/{wildcards.genome_build}/bigZips/{wildcards.genome_build}.2bit"
+
+
+rule convert_reference_genome_to_fasta:
+    input:
+        ReferenceGenome.path(file_ending="/reference.2bit"),
+    output:
+        ReferenceGenome.path(),
+    wrapper:
+        "v1.21.2/bio/ucsc/twoBitToFa"
 
 
 rule get_dataset_reference:
@@ -22,13 +43,18 @@ rule get_dataset_reference:
 # Simulates a set of variants that will be a source for a population
 rule simulate_variant_source:
     input:
-        base_genome = BaseGenome.path()
+        base_genome = BaseGenome.path(),
+        fai = BaseGenome.path(file_ending="/reference.fa.fai")
     output:
         variants = VariantSource.path()
     params:
         tmp_output = lambda wildcards, input, output: output[0].replace(".vcf", ".tmp.vcf")
-    conda:
-        "../envs/mason.yml"
+    #conda:
+    #    "../envs/mason.yml"
+    script:
+        "../scripts/simulate_variants.py"
+
+rule _outdated:
     shell:
         """
         mason_variator --seed 123 -ir {input.base_genome} -ov {params.tmp_output} \
