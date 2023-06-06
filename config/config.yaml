@@ -16,7 +16,7 @@ genomes:
     small:
       chromosomes: chr21
     medium:
-      chromosomes: chr1,chr2
+      chromosomes: chr19,chr20,chr21
 
   # simulated genome sequence
   simulated1:

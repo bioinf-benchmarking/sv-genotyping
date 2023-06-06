@@ -51,8 +51,14 @@ rule simulate_variant_source:
         tmp_output = lambda wildcards, input, output: output[0].replace(".vcf", ".tmp.vcf")
     #conda:
     #    "../envs/mason.yml"
-    script:
-        "../scripts/simulate_variants.py"
+    shell:
+        "python scripts/simulate_variants.py {input.base_genome} "
+        "{wildcards.snp_rate} "
+        "{wildcards.small_indel_rate} "
+        "{wildcards.sv_indel_rate} "
+        "{params.tmp_output} && "
+        "python3 scripts/remove_overlapping_indels.py {params.tmp_output} > {output}"
+
 
 rule _outdated:
     shell:

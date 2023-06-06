@@ -15,7 +15,7 @@ rule kage_no_impuation_index:
         index = GenotypeResults.path(method="kage_no_imputation",file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes}
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --modulo 200000033
         """
 
 
@@ -29,7 +29,7 @@ rule kage_index:
        index = GenotypeResults.path(method="kage", file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --make-helper-model True
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --make-helper-model True --modulo 200000033
         """
 
 

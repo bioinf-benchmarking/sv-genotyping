@@ -1,23 +1,29 @@
+import logging
+logging.basicConfig(level=logging.INFO)
 from bionumpy.simulate.variants import simulate_variants
 import bionumpy as bnp
+import typer
 
-genome = bnp.Genome.from_file(snakemake.input.base_genome)
-genome = genome.read_sequence(snakemake.input.base_genome)
+app = typer.Typer()
 
-with bnp.open(snakemake.output.variants + ".tmp.vcf", "w") as f:
 
-    for variants in simulate_variants(genome,
-                                      float(snakemake.wildcards.snp_rate),
-                                      float(snakemake.wildcards.small_indel_rate),
-                                      float(snakemake.wildcards.sv_indel_rate)):
-        print(variants)
-        f.write(variants)
-        
-        
-# add header
+@app.command()
+def simulate(base_genome: str, snp_rate: float, small_indel_rate: float, sv_indel_rate: float, out_file_name: str):
+    genome = bnp.Genome.from_file(base_genome)
+    genome = genome.read_sequence(base_genome)
 
-header = f"""##fileformat=VCFv4.1
-##reference={snakemake.input.base_genome}
+    with bnp.open(out_file_name + ".tmp.vcf", "w") as f:
+
+        for variants in simulate_variants(genome,
+                                          snp_rate,
+                                          small_indel_rate,
+                                          sv_indel_rate):
+            print(variants)
+            f.write(variants)
+
+    # add header
+    header = f"""##fileformat=VCFv4.1
+##reference={base_genome}
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
@@ -25,13 +31,17 @@ header = f"""##fileformat=VCFv4.1
 ##ALT=<ID=INV,Description="Inversion">
 ##ALT=<ID=DUP,Description="Duplication">
 """
-for chromosome, size in genome.genome_context.chrom_sizes.items():
-    header += f"##contig=<ID={chromosome},length={size}>\n"
+    for chromosome, size in genome.genome_context.chrom_sizes.items():
+        header += f"##contig=<ID={chromosome},length={size}>\n"
 
-header += """#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT"""
+    header += """#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT"""
 
-with open(snakemake.output.variants + ".tmp.vcf", "r") as f:
-    with open(snakemake.output.variants, "w") as out_file:
-        out_file.write(header)
-        for line in f:
-            out_file.write(line.strip() + "\tGT\n")
+    with open(out_file_name + ".tmp.vcf", "r") as f:
+        with open(out_file_name, "w") as out_file:
+            out_file.write(header)
+            for line in f:
+                out_file.write(line.strip() + "\tGT\n")
+
+
+if __name__ == "__main__":
+    app()
