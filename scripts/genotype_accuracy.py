@@ -77,6 +77,13 @@ for id, t in truth.items():
     else:
         assert False, (t, g)
 
+
+for id, variant in genotypes.items():
+    if id not in truth:
+        logging.error("Found genotype not in truth set:")
+        logging.error(f"{id}")
+        raise Exception()
+
 recall = true_positive / (true_positive + false_negative)
 precision = true_positive / (true_positive + false_positive)
 f1_score = 2 * (precision * recall) / (precision + recall)

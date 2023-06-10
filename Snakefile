@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 from snakemake.utils import min_version
 min_version("6.0")
 
@@ -26,12 +26,12 @@ class ReferenceGenome:
 @parameters
 class BaseGenome:
     genome_build: GenomeBuild
-    size: Literal["small", "medium", "large"] = "small"
+    size: Literal["small", "medium", "big"] = "small"
     file_ending = "/reference.fa"
 
 
 @parameters
-class VariantSource:
+class SimulatedVariantSource:
     base_genome: BaseGenome
     snp_rate: float = 0.001
     small_indel_rate: float = 0.0001
@@ -40,11 +40,41 @@ class VariantSource:
 
 
 @parameters
-class Population:
-    variants: VariantSource
+class RealVariantSource:
+    base_genome: BaseGenome
+    folder_name: Literal["real_variants"]
+    database_name: str = "1000genomes"
+    variant_type: Literal["snps_indels", "svs", "all"] = "snps_indels"
+    file_ending = "/variants.vcf.gz"
+
+
+@parameters
+class RealVariantSourceSingleChromosome:
+    variants: RealVariantSource
+    chromosome: str = "1"
+    file_ending = "/variants.vcf.gz"
+
+
+@parameters
+class SimulatedPopulation:
+    variants: SimulatedVariantSource
     n_individuals: int = 10
     allele_frequency: float = 0.3
     correlation: float = 0.8
+    file_ending = "/population.vcf"
+
+
+
+@parameters
+class FilteredRealPopulation:
+    population: RealVariantSource
+    allele_frequency: float = 0.1
+    n_individuals: int = 10
+    file_ending = "/population.vcf"
+
+@parameters
+class Population:
+    population: Union[FilteredRealPopulation, SimulatedPopulation]
     file_ending = "/population.vcf"
 
 
@@ -95,7 +125,7 @@ class GenotypeF1Score:
     variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 
-print("Path", GenotypeRecall.path())
+print("Path", Population.path())
 
 include: "rules/variant_simulation.smk"
 include: "rules/population_simulation.smk"
@@ -103,6 +133,7 @@ include: "rules/read_simulation.smk"
 include: "rules/pangenie.smk"
 include: "rules/evaluation.smk"
 include: "rules/kage.smk"
+include: "rules/thousand_genomes_data.smk"
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 

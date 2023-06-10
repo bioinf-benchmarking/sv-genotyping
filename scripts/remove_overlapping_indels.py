@@ -2,11 +2,17 @@ import logging
 logging.basicConfig(level=logging.INFO)
 import sys
 from collections import defaultdict
+import gzip
 
-if len(sys.argv) == 1 or sys.argv[1] == "-":
-    vcf = sys.stdin
+file_name = sys.argv[1]
+is_gzipped = False
+if file_name.endswith(".gz"):
+    is_gzipped = True
+    func = gzip.open
 else:
-    vcf = open(sys.argv[1])
+    func = open
+
+vcf = func(sys.argv[1])
 
 n_snps = 0
 n_indels_removed = 0
@@ -15,6 +21,9 @@ snp_positions = defaultdict(set)
 
 # First get position of all SNPs
 for i, line in enumerate(vcf):
+    if is_gzipped:
+        line = line.decode("utf-8")
+
     if line.startswith("#"):
         continue
 
@@ -31,14 +40,15 @@ for i, line in enumerate(vcf):
 
 logging.info("Found %d snps" % n_snps)
 
-if len(sys.argv) == 1 or sys.argv[1] == "-":
-    vcf = sys.stdin
-else:
-    vcf = open(sys.argv[1])
+
+vcf = func(sys.argv[1])
 
 indel_positions = defaultdict(set)
 
 for i, line in enumerate(vcf):
+
+    if is_gzipped:
+        line = line.decode("utf-8")
 
     if i % 1000000 == 0:
         logging.info("%d lines processed" % i)

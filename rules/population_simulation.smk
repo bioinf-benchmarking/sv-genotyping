@@ -2,9 +2,9 @@
 
 rule simulate_population:
     input:
-        variant_source = VariantSource.path()
+        variant_source = SimulatedVariantSource.path()
     output:
-        population = Population.path()
+        population = SimulatedPopulation.path()
     shell:
         """
         python3 scripts/population_simulation.py {input.variant_source} \
@@ -30,7 +30,7 @@ rule remove_individual_from_population:
 
 rule extract_individual_from_population:
     input:
-        population=Population.path()
+        population = Population.path()
     output:
         individual = Individual.path()
     conda:

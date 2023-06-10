@@ -14,7 +14,7 @@ rule download_reference:
     output:
         ReferenceGenome.path(file_ending="/reference.2bit"),
     shell:
-        "wget -O {output} https://hgdownload.soe.ucsc.edu/goldenPath/{wildcards.genome_build}/bigZips/{wildcards.genome_build}.2bit"
+        "wget -O - https://hgdownload.soe.ucsc.edu/goldenPath/{wildcards.genome_build}/bigZips/{wildcards.genome_build}.2bit > {output}"
 
 
 rule convert_reference_genome_to_fasta:
@@ -22,8 +22,14 @@ rule convert_reference_genome_to_fasta:
         ReferenceGenome.path(file_ending="/reference.2bit"),
     output:
         ReferenceGenome.path(),
-    wrapper:
-        "v1.21.2/bio/ucsc/twoBitToFa"
+    conda:
+        "../envs/twobittofa.yml"
+    params:
+        remove_chr_prefix = lambda wildcards, input, output: " && sed -i 's/>chr/>/g' " + output[0] if config["genomes"][wildcards.genome_build]["remove_chr_prefix"] else ""
+    shell:
+        "twoBitToFa {input} {output} {params.remove_chr_prefix}"
+    #wrapper:
+        #    "v1.21.2/bio/ucsc/twoBitToFa"
 
 
 rule get_dataset_reference:
@@ -35,7 +41,7 @@ rule get_dataset_reference:
     conda:
         "../envs/samtools.yml"
     params:
-        regions=lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].replace(",", " ")
+        regions=lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].replace(",", " "),
     shell:
         "samtools faidx {input.ref} {params.regions} > {output.base_genome}"
 
@@ -46,7 +52,7 @@ rule simulate_variant_source:
         base_genome = BaseGenome.path(),
         fai = BaseGenome.path(file_ending="/reference.fa.fai")
     output:
-        variants = VariantSource.path()
+        variants = SimulatedVariantSource.path()
     params:
         tmp_output = lambda wildcards, input, output: output[0].replace(".vcf", ".tmp.vcf")
     #conda:
@@ -56,8 +62,8 @@ rule simulate_variant_source:
         "{wildcards.snp_rate} "
         "{wildcards.small_indel_rate} "
         "{wildcards.sv_indel_rate} "
-        "{params.tmp_output} && "
-        "python3 scripts/remove_overlapping_indels.py {params.tmp_output} > {output}"
+        "{output.variants}  "
+        #"&& python3 scripts/remove_overlapping_indels.py {params.tmp_output} > {output}"
 
 
 rule _outdated:

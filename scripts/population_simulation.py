@@ -1,9 +1,25 @@
 import logging
+
+import tqdm
+
 logging.basicConfig(level=logging.INFO)
 import numpy as np
 import bionumpy as bnp
 import typer
 app = typer.Typer()
+
+
+def simulate_population_genotype_matrix_from_real(n_variants: int, n_individuals: int, real_haplotype_matrix):
+    assert real_haplotype_matrix.shape[0] >= n_variants
+    assert real_haplotype_matrix.shape[1] >= n_individuals * 2
+
+    # simply select a subset
+    haplotypes = real_haplotype_matrix[:n_variants, :n_individuals * 2]
+    genotype_matrix = np.zeros((n_variants, n_individuals))
+    genotype_matrix += haplotypes[:, 0::2]*2
+    genotype_matrix += haplotypes[:, 1::2]
+    return haplotypes
+
 
 def simulate_population_genotype_matrix(n_variants: int, n_individuals: int, ratio_non_ref_allele: float, correlation: float):
     """
@@ -18,10 +34,11 @@ def simulate_population_genotype_matrix(n_variants: int, n_individuals: int, rat
     """
 
     n_haplotypes = n_individuals * 2
-    major_allele = np.random.choice([0, 1], size=n_variants, p=[1 - ratio_non_ref_allele, ratio_non_ref_allele])
-    follows_major = np.random.choice([0, 1], size=(n_haplotypes, n_variants), p=[1 - correlation, correlation])
+    major_allele = np.random.choice([0, 1], size=n_variants, p=[1 - ratio_non_ref_allele, ratio_non_ref_allele]).astype(np.uint8)
+    follows_major = np.random.choice([0, 1], size=(n_haplotypes, n_variants), p=[1 - correlation, correlation]).astype(np.uint8)
     logging.info("N follows major: %s" % np.sum(follows_major, axis=1))
     haplotypes = (follows_major * major_allele).T
+
 
     logging.info(f"Haplotype matrix: {haplotypes}")
     logging.info("Allele frequencies: %s"  % (np.mean(haplotypes, axis=0)))
@@ -54,13 +71,17 @@ def simulate_population_phased_vcf(vcf: str, out_file: str, n_individuals: int, 
     n_variants = len(variants)
     logging.info("Number of variants: %s" % n_variants)
 
-    genotype_matrix = simulate_population_genotype_matrix(n_variants, n_individuals, ratio_non_ref_allele, correlation)
+    # if n_variants is large, we can just simulate a smaller matrix and reuse it
+    n_variants_matrix = min(n_variants, 50000)
+
+    genotype_matrix = simulate_population_genotype_matrix(n_variants_matrix, n_individuals, ratio_non_ref_allele, correlation)
     genotype_strings = ["0|0", "0|1", "1|0", "1|1"]
 
+    logging.info("Writing vcf")
     with open(vcf) as f:
         with open(out_file, "w") as out:
             variant_id = 0
-            for line in f:
+            for line in tqdm.tqdm(f, total=n_variants, desc="Writing vcf", unit="variants"):
                 if line.startswith("#"):
                     if line.lower().startswith("#chrom"):
                         out.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
@@ -74,7 +95,7 @@ def simulate_population_phased_vcf(vcf: str, out_file: str, n_individuals: int, 
                 fields[8] = "GT"
                 fields = fields[:9]
                 for i in range(0, n_individuals):
-                    fields.append(genotype_strings[int(genotype_matrix[variant_id, i])])
+                    fields.append(genotype_strings[int(genotype_matrix[variant_id % n_variants_matrix, i])])
 
                 out.write("\t".join(fields) + "\n")
                 variant_id += 1
