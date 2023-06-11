@@ -52,8 +52,14 @@ print(FilteredMerged1000GenomesVariants.path())
 rule download_thousand_genomes_snps_indels_for_chromosome:
     output:
         RealVariantSourceSingleChromosome.path(database_name="1000genomes", variant_type="snps_indels")
+    params:
+        url = lambda wildcards: f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr{wildcards.chromosome}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
     shell:
-        "wget -O {output} ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr{wildcards.chromosome}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz	"
+        # tmp for testing, keep only few lines
+        "curl -NL {params.url} 2>/dev/null  "
+        "| zcat "
+        "| head -n 100000 "
+        "| python scripts/filter_variants_with_n.py | bgzip -c > {output} || true "
 
 
 rule filter_variants_on_allele_frequency:
@@ -176,7 +182,7 @@ rule merge_1000genomes_variant_types:
         bcftools view --samples-file {output}.samples {input.svs} -Oz -o {input.svs}.subset.vcf.gz &&
         tabix -p vcf {input.snps_indels}.subset.vcf.gz &&
         tabix -p vcf {input.svs}.subset.vcf.gz &&
-        bcftools concat --naive {input.snps_indels}.subset.vcf.gz {input.svs}.subset.vcf.gz -Oz -o {output}
+        bcftools concat --allow-overlaps {input.snps_indels}.subset.vcf.gz {input.svs}.subset.vcf.gz -Oz -o {output}
         """
 
 
@@ -193,9 +199,11 @@ rule get_random_sample_names_from_vcf:
         "python scripts/shuffle_lines.py {output}.tmp {config[random_seed]} | head -n {wildcards.n} > {output}"
 
 
+
 rule filter_real_population:
     input:
         vcf = RealVariantSource.path(variant_type="all"),
+        index = RealVariantSource.path(variant_type="all", file_ending="/variants.vcf.gz.tbi"),
         sample_names = RealVariantSource.path(variant_type="all", file_ending="/variants.{n_individuals}_random_sample_names.txt")
     output:
         vcf = FilteredRealPopulation.path(variant_type="all")

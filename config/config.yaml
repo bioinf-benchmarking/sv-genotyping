@@ -17,7 +17,7 @@ genomes:
   hg38:
     remove_chr_prefix: True
     small:
-      chromosomes: 20,21
+      chromosomes: "21"
     medium:
       chromosomes: chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10
     big:
