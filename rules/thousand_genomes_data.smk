@@ -56,10 +56,14 @@ rule download_thousand_genomes_snps_indels_for_chromosome:
         url = lambda wildcards: f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr{wildcards.chromosome}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
     shell:
         # tmp for testing, keep only few lines
-        "curl -NL {params.url} 2>/dev/null  "
+        "true || curl -NL {params.url} 2>/dev/null  "
         "| zcat "
-        "| head -n 100000 "
-        "| python scripts/filter_variants_with_n.py | bgzip -c > {output} || true "
+        "| head -n 10000 "
+        #"| python scripts/filter_variants_with_n.py "
+        " > {output}.tmp "
+        " && python scripts/remove_overlapping_indels.py {output}.tmp  "
+        "| bgzip -c > {output}  "
+        " || true"
 
 
 rule filter_variants_on_allele_frequency:
@@ -186,6 +190,15 @@ rule merge_1000genomes_variant_types:
         """
 
 
+#hacky rule to filter out a dataset with only snps and indels and give it a database name
+#rule get_1000genomes_only_snps_and_indels_dataset:
+#    input:
+#        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels"),
+#    output:
+#        snps_indels = RealVariantSource.path(database_name="1000genomes_only_snps_indels", variant_type="snps_indels"),
+#    shell:
+#        "cp {input.snps_indels} {output.snps_indels}"
+
 
 rule get_random_sample_names_from_vcf:
     input:
@@ -202,68 +215,16 @@ rule get_random_sample_names_from_vcf:
 
 rule filter_real_population:
     input:
-        vcf = RealVariantSource.path(variant_type="all"),
-        index = RealVariantSource.path(variant_type="all", file_ending="/variants.vcf.gz.tbi"),
-        sample_names = RealVariantSource.path(variant_type="all", file_ending="/variants.{n_individuals}_random_sample_names.txt")
+        vcf = RealVariantSource.path(),
+        index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
+        sample_names = RealVariantSource.path(file_ending="/variants.{n_individuals}_random_sample_names.txt")
     output:
-        vcf = FilteredRealPopulation.path(variant_type="all")
+        vcf = FilteredRealPopulation.path()
     conda:
         "../envs/bcftools.yml"
     shell:
-        """
-        bcftools view -S {input.sample_names} {input.vcf} | bcftools view -q {wildcards.allele_frequency} -o {output.vcf}
-        """
+        #"bcftools view -S {input.sample_names} {input.vcf} | bcftools view -q {wildcards.allele_frequency} -o {output.vcf}"
+        "bcftools view -q {wildcards.allele_frequency} {input.vcf} | bcftools view -S {input.sample_names} -o {output.vcf}"
 
 
-
-rule get_sv_samples:
-    input:
-        Filtered1000GenomesStructuralVariants.path()
-    output:
-        "data/real_data/1000genomes_svs/samples.txt"
-    conda:
-        "../envs/bcftools.yml"
-    shell:
-        """
-        bcftools query -l {input} > {output}
-        """
-
-
-rule subset_sv_on_samples:
-    input:
-        variants=Filtered1000GenomesStructuralVariants.path(),
-        individiuals="data/real_data/1000genomes_snps_indels/samples_common.txt"
-    output:
-        FilteredOnSamples1000GenomesStructuralVariants.path()
-    conda:
-        "../envs/bcftools.yml"
-    shell:
-        """
-        bcftools view --samples-file {input.individiuals} {input.variants} -Oz -o {output}
-        """
-
-
-rule get_snp_indel_samples:
-    input:
-        Raw1000GenomesVariants.path(chromosome="21")
-    output:
-        "data/real_data/1000genomes_snps_indels/samples.txt"
-    conda:
-        "../envs/bcftools.yml"
-    shell:
-        """
-        bcftools query -l {input} > {output}
-        """
-
-
-rule find_common_samples_in_sv_and_snp_indels:
-    input:
-        svs="data/real_data/1000genomes_svs/samples.txt",
-        snps="data/real_data/1000genomes_snps_indels/samples.txt"
-    output:
-        "data/real_data/1000genomes_snps_indels/samples_common.txt"
-    shell:
-        """
-        comm -12 {input.svs} {input.snps} > {output}
-        """
 

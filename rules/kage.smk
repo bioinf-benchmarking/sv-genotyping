@@ -15,7 +15,7 @@ rule kage_no_impuation_index:
         index = GenotypeResults.path(method="kage_no_imputation",file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --modulo 200000033
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --modulo 200000033 --variant-window 4
         """
 
 
@@ -48,7 +48,8 @@ rule run_kage:
         index = GenotypeResults.path(method="kage", file_ending="/index.npz"),
         reads = Reads.path()
     output:
-        results = GenotypeResults.path(method="kage")
+        results = GenotypeResults.path(method="kage"),
+        node_counts = GenotypeResults.path(method="kage", file_ending="/genotypes.vcf.node_counts.npy")
     shell:
         "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage}"
 

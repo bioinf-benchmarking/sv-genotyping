@@ -109,6 +109,18 @@ class GenotypeResults:
     file_ending = "/genotypes.vcf"
 
 
+@parameters
+class GenotypeDebug:
+    genotype_results: GenotypeResults
+    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    file_ending = "/debug.txt"
+
+
+@result
+class GenotypeReport:
+    genotype_results: GenotypeResults
+    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+
 @result
 class GenotypeRecall:
     genotype_results: GenotypeResults

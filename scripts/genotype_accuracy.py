@@ -23,9 +23,11 @@ def get_genotypes_from_vcf(vcf_file_name, variant_type="all"):
     assert variant_type in ["all", "small_indels", "snps", "svs"]
     out = {}
     n_skipped = 0
+    n_tot = 0
     with open(vcf_file_name) as f:
         lines = (l for l in f if not l.startswith("#"))
         for line in lines:
+            n_tot += 1
             l = line.split()
             chrom = l[0]
             start = l[1]
@@ -42,7 +44,7 @@ def get_genotypes_from_vcf(vcf_file_name, variant_type="all"):
             out[id] = parse_genotype(genotype)
         #genotypes = (l.split()[9].split(":")[0] for l in lines)
         #return [parse_genotype(g) for g in genotypes]
-        logging.info(f"Skipped {n_skipped} variants not matching variant type {variant_type}")
+        logging.info(f"Skipped {n_skipped}/{n_tot} variants not matching variant type {variant_type}")
         return out
 
 
@@ -56,7 +58,12 @@ true_negative = 0
 false_positive = 0
 false_negative = 0
 
-for id, t in truth.items():
+out_report = {
+    "false_negatives": [],
+    "false_positives": []
+}
+
+for i, (id, t) in enumerate(truth.items()):
     if id not in genotypes:
         # did not genotype, treat as 0/0
         g = "0/0"
@@ -70,8 +77,10 @@ for id, t in truth.items():
         true_positive += 1
     elif t == '0/0' and g != '0/0':
         false_positive += 1
+        out_report["false_positives"].append(i)
     elif t != '0/0' and g != t:
         false_negative += 1
+        out_report["false_negatives"].append(i)
     elif t == "0/0" and g == "0/0":
         true_negative += 1
     else:
@@ -98,4 +107,7 @@ with open(snakemake.output.one_minus_precision, 'w') as f:
 
 with open(snakemake.output.f1, 'w') as f:
     f.write(str(f1_score))
+
+with open(snakemake.output.report, 'wb') as f:
+    pickle.dump(out_report, f)
 
