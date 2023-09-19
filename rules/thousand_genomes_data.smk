@@ -56,14 +56,15 @@ rule download_thousand_genomes_snps_indels_for_chromosome:
         url = lambda wildcards: f"ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr{wildcards.chromosome}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
     shell:
         # tmp for testing, keep only few lines
-        "true || curl -NL {params.url} 2>/dev/null  "
+        #"true || curl -NL {params.url} 2>/dev/null  "
+        "curl -NL {params.url}"
         "| zcat "
-        "| head -n 10000 "
-        #"| python scripts/filter_variants_with_n.py "
-        " > {output}.tmp "
-        " && python scripts/remove_overlapping_indels.py {output}.tmp  "
+        #"| head -n 10000 "
+        "| python scripts/filter_variants_with_n.py "
+        #" > {output}.tmp && "
+        #" && python scripts/remove_overlapping_indels.py {output}.tmp  "
         "| bgzip -c > {output}  "
-        " || true"
+        #" || true"
 
 
 rule filter_variants_on_allele_frequency:
@@ -92,7 +93,7 @@ rule filter_1000genomes_svs:
     output:
         RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/filtered.vcf.gz")
     conda:
-        "../envs/bgzip.yml"
+        "../envs/filter_svs.yml"
     shell:
         """
         python scripts/filter_svs.py {input} | bgzip -c > {output}
@@ -108,7 +109,7 @@ rule subset_svs_on_dataset_chromosomes:
     params:
         chromosomes = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"]
     conda:
-        "../envs/bgzip.yml"
+        "../envs/bcftools.yml"
     shell:
         """
         bcftools view --regions {params.chromosomes} {input.vcf} -Oz -o {output}
@@ -200,16 +201,27 @@ rule merge_1000genomes_variant_types:
 #        "cp {input.snps_indels} {output.snps_indels}"
 
 
-rule get_random_sample_names_from_vcf:
+rule get_all_sample_names_from_vcf:
     input:
         "{variants}.vcf.gz"
     output:
-        "{variants}.{n}_random_sample_names.txt"
+        "{variants}.all_sample_names.txt"
     conda:
         "../envs/bcftools.yml"
     shell:
-        "bcftools query -l {input} > {output}.tmp && "
-        "python scripts/shuffle_lines.py {output}.tmp {config[random_seed]} | head -n {wildcards.n} > {output}"
+        "bcftools query -l {input} > {output}"
+
+
+rule get_random_sample_names_from_vcf:
+    input:
+        "{variants}.all_sample_names.txt"
+    output:
+        out="{variants}.{n}_random_sample_names.txt"
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python scripts/shuffle_lines.py {input} {config[random_seed]} {wildcards.n} {output}"
+
 
 
 

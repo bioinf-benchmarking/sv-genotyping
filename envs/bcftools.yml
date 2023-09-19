@@ -4,3 +4,4 @@ channels:
 dependencies:
   - bcftools=1.4.1
   - openssl=1.0
+  - python=3

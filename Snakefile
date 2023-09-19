@@ -26,7 +26,7 @@ class ReferenceGenome:
 @parameters
 class BaseGenome:
     genome_build: GenomeBuild
-    size: Literal["small", "medium", "big"] = "small"
+    size: str = "small"
     file_ending = "/reference.fa"
 
 

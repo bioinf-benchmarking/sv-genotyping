@@ -1,0 +1,8 @@
+channels:
+  - bioconda
+
+dependencies:
+  - tabix
+  - python=3.8
+  - pip:
+      - typer
