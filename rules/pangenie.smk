@@ -45,6 +45,16 @@ rule run_pangenie:
          """
 
 
+# rule that outputs only the multiallelic vcf from pangenie as a "pangenie_multiallelic" method
+rule run_pangenie_multiallelic:
+    input:
+        results = GenotypeResults.path(method="pangenie",file_ending="/genotypes_multiallelic.vcf")
+    output:
+        results = GenotypeResults.path(method="pangenie_multiallelic",file_ending="/genotypes.vcf")
+    shell:
+        "cp {input} {output}"
+
+
 rule convert_pangenie_genotypes_back_to_biallelic:
     input:
         callset_vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),

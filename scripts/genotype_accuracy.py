@@ -4,11 +4,13 @@
 import logging
 logging.basicConfig(level=logging.INFO)
 
+
 def parse_genotype(genotype):
     if genotype == ".":
         return "0/0"
     else:
         return genotype.replace("|", "/").replace("1/0", "0/1")
+
 
 def get_variant_type(ref, alt):
     if len(ref) == len(alt) == 1:

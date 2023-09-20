@@ -104,7 +104,7 @@ class Reads:
 @parameters
 class GenotypeResults:
     reads: Reads
-    method: Literal["pangenie", "kage", "kage_no_imputation"] = "kage"
+    method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic"] = "kage"
     n_threads: int = 1
     file_ending = "/genotypes.vcf"
 
@@ -145,6 +145,7 @@ include: "rules/read_simulation.smk"
 include: "rules/pangenie.smk"
 include: "rules/evaluation.smk"
 include: "rules/kage.smk"
+include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
