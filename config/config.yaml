@@ -31,6 +31,13 @@ genomes:
     big:
       chromosomes: "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"
 
+  chm13:
+    remove_chr_prefix: False
+    tiny:
+      chromosomes: "chr21:0-20000000"
+    small:
+      chromosomes: "chr21"
+
   # simulated genome sequence
   simulated1:
     genome_size: 10000000

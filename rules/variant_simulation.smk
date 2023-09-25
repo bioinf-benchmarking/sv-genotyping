@@ -8,13 +8,22 @@ rule samtools_index:
         "{sample}.fa.fai",
     wrapper:
         "v1.21.2/bio/samtools/faidx"
+    
+    
+def get_reference_url(wildcards):
+    if wildcards.genome_build == "chm13":
+        return "https://t2t.gi.ucsc.edu/chm13/hub/t2t-chm13-v1.0/CAT_V2/assemblyHub/CHM13/CHM13.2bit"
+    else:
+        return f"https://hgdownload.soe.ucsc.edu/goldenPath/{wildcards.genome_build}/bigZips/{wildcards.genome_build}.2bit"
 
 
 rule download_reference:
     output:
         ReferenceGenome.path(file_ending="/reference.2bit"),
+    params:
+        url = get_reference_url
     shell:
-        "wget -O - https://hgdownload.soe.ucsc.edu/goldenPath/{wildcards.genome_build}/bigZips/{wildcards.genome_build}.2bit > {output}"
+        "wget -O - {params.url} > {output}"
 
 
 rule convert_reference_genome_to_fasta:
@@ -32,18 +41,32 @@ rule convert_reference_genome_to_fasta:
         #    "v1.21.2/bio/ucsc/twoBitToFa"
 
 
+rule get_chm13_reference:
+    output:
+        ReferenceGenome.path(genome_build="chm13"),
+    shell:
+        """
+        cp local_data/CHM13v11Y.fa {output}
+        """
+
+
+ruleorder: get_chm13_reference > convert_reference_genome_to_fasta
+
+
 rule get_dataset_reference:
     input:
         ref = ReferenceGenome.path(),
         index = ReferenceGenome.path(file_ending="/reference.fa.fai")
     output:
+        tmp_genome = temp(BaseGenome.path(file_ending="/reference_tmp.fa")),
         base_genome = BaseGenome.path()
     conda:
         "../envs/samtools.yml"
     params:
         regions=lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].replace(",", " "),
     shell:
-        "samtools faidx {input.ref} {params.regions} > {output.base_genome}"
+        "samtools faidx {input.ref} {params.regions} > {output.tmp_genome} && "
+        "python scripts/format_fasta_headers.py {output.tmp_genome} {output.base_genome}"
 
 
 # Simulates a set of variants that will be a source for a population

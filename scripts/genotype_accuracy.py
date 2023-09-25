@@ -3,13 +3,19 @@
 # truth = bnp.open(input.truth, buffer_type=bnp.io.delimited_buffers.VCFMatrixBuffer).read()
 import logging
 logging.basicConfig(level=logging.INFO)
+from kage.analysis.genotype_accuracy import GenotypeAccuracy, IndexedGenotypes
 
-
+"""
 def parse_genotype(genotype):
     if genotype == ".":
         return "0/0"
     else:
-        return genotype.replace("|", "/").replace("1/0", "0/1")
+        # sort by smallest allele first to make comparison of
+        # unphased genontypes possible
+        genotype = genotype.replace("|", "/").replace("1/0", "0/1")
+        alleles = genotype.split("/")
+        alleles = sorted(alleles)
+        return "/".join(alleles)
 
 
 def get_variant_type(ref, alt):
@@ -89,15 +95,25 @@ for i, (id, t) in enumerate(truth.items()):
         assert False, (t, g)
 
 
-for id, variant in genotypes.items():
-    if id not in truth:
-        logging.error("Found genotype not in truth set:")
+for id, variant in truth.items():
+    if id not in genotypes:
+        logging.error("Found truth genotype not in genotype set:")
         logging.error(f"{id}")
         raise Exception()
 
 recall = true_positive / (true_positive + false_negative)
 precision = true_positive / (true_positive + false_positive)
 f1_score = 2 * (precision * recall) / (precision + recall)
+"""
+
+truth = IndexedGenotypes.from_multiallelic_vcf(snakemake.input.truth)
+sample = IndexedGenotypes.from_multiallelic_vcf(snakemake.input.genotypes)
+accuracy = GenotypeAccuracy(truth, sample)
+recall = accuracy.recall()
+precision = accuracy.precision()
+f1_score = accuracy.f1()
+out_report = accuracy.get_debug_report()
+
 
 print(f"Recall: {recall}, One minus precision: {1 - precision}, F1 score: {f1_score}")
 

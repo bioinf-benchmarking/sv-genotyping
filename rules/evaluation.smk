@@ -1,9 +1,20 @@
 
 
+def get_individual_for_genotype_accuracy(wildcards):
+    print(Individual.from_flat_params(*wildcards).path(file_ending="/individual.vcf"))
+    print(wildcards.method)
+    print(Individual.path())
+    if "_multiallelic" in wildcards.method:
+        return Individual.path(file_ending="/individual.multiallelic.vcf")
+    else:
+        return Individual.path()
+
+
 
 rule genotype_accuracy:
     input:
-        truth = Individual.path(),
+        #truth = get_individual_for_genotype_accuracy,
+        truth = Individual.path(file_ending="/individual.vcf"),
         genotypes = GenotypeResults.path()
     output:
         recall = GenotypeRecall.path(),
@@ -13,6 +24,18 @@ rule genotype_accuracy:
     script:
         "../scripts/genotype_accuracy.py"
 
+rule genotype_accuracy_multiallelic:
+    input:
+        #truth = get_individual_for_genotype_accuracy,
+        truth = Individual.path(file_ending="/individual.multiallelic.vcf"),
+        genotypes = GenotypeResults.path(method="kage_multiallelic")
+    output:
+        f1 = GenotypeF1Score.path(method="kage_multiallelic"),
+    script:
+        "../scripts/genotype_accuracy.py"
+
+
+ruleorder: genotype_accuracy_multiallelic > genotype_accuracy
 
 
 rule kage_debug:

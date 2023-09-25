@@ -14,7 +14,7 @@ snakehelp.set_data_folder("data/")
 
 @parameters
 class GenomeBuild:
-    genome_build: Literal["sacCer3", "hg38"] = "sacCer3"
+    genome_build: Literal["sacCer3", "hg38", "chm13"] = "sacCer3"
 
 
 @parameters
@@ -43,7 +43,7 @@ class SimulatedVariantSource:
 class RealVariantSource:
     base_genome: BaseGenome
     folder_name: Literal["real_variants"]
-    database_name: str = "1000genomes"
+    database_name: Literal["1000genomes", "hprc"] = "1000genomes"
     variant_type: Literal["snps_indels", "svs", "all"] = "snps_indels"
     file_ending = "/variants.vcf.gz"
 
@@ -147,6 +147,7 @@ include: "rules/evaluation.smk"
 include: "rules/kage.smk"
 include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
+include: "rules/hprc_data.smk"
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 

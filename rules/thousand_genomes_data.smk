@@ -65,7 +65,7 @@ rule download_thousand_genomes_snps_indels_for_chromosome:
         #" > {output}.tmp && "
         #" && python scripts/remove_overlapping_indels.py {output}.tmp  "
         "| bgzip -c > {output}  "
-        #" || true"
+        " || true"
 
 
 rule filter_variants_on_allele_frequency:
@@ -101,12 +101,12 @@ rule filter_1000genomes_svs:
         """
 
 
-rule subset_svs_on_dataset_chromosomes:
+rule subset_variants_on_dataset_chromosomes:
     input:
-        vcf = RealVariantSource.path(database_name="1000genomes",variant_type="svs",file_ending="/filtered.vcf.gz"),
-        index = RealVariantSource.path(database_name="1000genomes",variant_type="svs",file_ending="/filtered.vcf.gz.tbi"),
+        vcf = RealVariantSource.path(file_ending="/filtered.vcf.gz"),
+        index = RealVariantSource.path(file_ending="/filtered.vcf.gz.tbi"),
     output:
-        RealVariantSource.path(database_name="1000genomes",variant_type="svs")
+        RealVariantSource.path()  # may need variant_type=svs to not conflict with snps/indels
     params:
         chromosomes = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"]
     conda:
@@ -136,7 +136,7 @@ rule subset_on_individuals_snps_indels:
 
 def snps_indels_files(wildcards):
     chromosomes = config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].split(",")
-    return [RealVariantSourceSingleChromosome.path(variant_type="snps_indels", chromosome=chromosome) for chromosome in chromosomes]
+    return [RealVariantSourceSingleChromosome.path(database_name="1000genomes", variant_type="snps_indels", chromosome=chromosome) for chromosome in chromosomes]
 
 
 def all_files(wildcarsd):
@@ -150,12 +150,16 @@ rule merge_1000genomes_snps_indels:
     input:
         snps_indels_files
     output:
-        RealVariantSource.path(variant_type="snps_indels")
+        RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels")
     conda:
         "../envs/bcftools.yml"
     shell:
         "bcftools concat --naive {input} -Oz -o {output}"
 
+
+# snps_indels is only for snps indels, these vcfs needs to be merged
+# svs and "all" are generally  from one single vcf which needs to be subset
+ruleorder: merge_1000genomes_snps_indels > subset_variants_on_dataset_chromosomes
 
 rule tabix:
     input:
@@ -175,7 +179,7 @@ rule merge_1000genomes_variant_types:
         svs = RealVariantSource.path(variant_type="svs"),
         svs_index = RealVariantSource.path(variant_type="svs", file_ending="/variants.vcf.gz.tbi"),
     output:
-        RealVariantSource.path(variant_type="all"),
+        RealVariantSource.path(database_name="1000genomes", variant_type="all"),
     conda:
         "../envs/bcftools.yml"
     shell:

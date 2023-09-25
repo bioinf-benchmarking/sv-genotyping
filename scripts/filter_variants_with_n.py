@@ -5,7 +5,7 @@ n_skipped = 0
 
 for i, line in enumerate(sys.stdin):
 
-    if i % 1000 == 0:
+    if i % 100000 == 0:
         logging.info("%d lines processed, %d variants with N skipped" % (i, n_skipped))
 
     if line.startswith("#"):

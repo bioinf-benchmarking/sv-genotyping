@@ -3,9 +3,11 @@
 # assign IDs to all alleles
 rule add_ids:
     input:
-        vcf=PopulationWithoutIndividual.path()
+        vcf="{file}.vcf"
+        #vcf=PopulationWithoutIndividual.path()
     output:
-        vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),
+        vcf = "{file}.with_ids.vcf"
+        #vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),
     shell:
         'cat {input} | python3 scripts/pangenie_add_ids.py > {output}'
 
@@ -17,6 +19,18 @@ rule merge_haplotypes:
         reference = BaseGenome.path(),
     output:
         population_vcf = PopulationWithoutIndividual.path(file_ending="/population.multiallelic.vcf"),
+    shell:
+        """
+        python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output}
+        """
+
+
+rule merge_individual_haplotypes:
+    input:
+        vcf=Individual.path(file_ending="/individual.with_ids.vcf"),
+        reference = BaseGenome.path(),
+    output:
+        vcf = Individual.path(file_ending="/individual.multiallelic.vcf"),
     shell:
         """
         python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output}
