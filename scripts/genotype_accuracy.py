@@ -3,7 +3,7 @@
 # truth = bnp.open(input.truth, buffer_type=bnp.io.delimited_buffers.VCFMatrixBuffer).read()
 import logging
 logging.basicConfig(level=logging.INFO)
-from kage.analysis.genotype_accuracy import GenotypeAccuracy, IndexedGenotypes
+from kage.analysis.genotype_accuracy import GenotypeAccuracy, IndexedGenotypes, IndexedGenotypes2
 
 """
 def parse_genotype(genotype):
@@ -106,16 +106,19 @@ precision = true_positive / (true_positive + false_positive)
 f1_score = 2 * (precision * recall) / (precision + recall)
 """
 
-truth = IndexedGenotypes.from_multiallelic_vcf(snakemake.input.truth)
-sample = IndexedGenotypes.from_multiallelic_vcf(snakemake.input.genotypes)
+truth = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.truth, convert_to_biallelic=False)
+sample = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.genotypes, convert_to_biallelic=False)
+sample.normalize_against_reference_variants(truth)
+
 accuracy = GenotypeAccuracy(truth, sample)
 recall = accuracy.recall()
 precision = accuracy.precision()
 f1_score = accuracy.f1()
+weighted_genotype_concordance = accuracy.weighted_concordance
 out_report = accuracy.get_debug_report()
 
 
-print(f"Recall: {recall}, One minus precision: {1 - precision}, F1 score: {f1_score}")
+print(f"Recall: {recall}, One minus precision: {1 - precision}, F1 score: {f1_score}, Weighted concordance: {weighted_genotype_concordance}")
 
 with open(snakemake.output.recall, 'w') as f:
     f.write(str(recall))

@@ -59,14 +59,23 @@ rule get_dataset_reference:
         index = ReferenceGenome.path(file_ending="/reference.fa.fai")
     output:
         tmp_genome = temp(BaseGenome.path(file_ending="/reference_tmp.fa")),
-        base_genome = BaseGenome.path()
+        #base_genome = BaseGenome.path()
     conda:
         "../envs/samtools.yml"
     params:
         regions=lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].replace(",", " "),
     shell:
-        "samtools faidx {input.ref} {params.regions} > {output.tmp_genome} && "
-        "python scripts/format_fasta_headers.py {output.tmp_genome} {output.base_genome}"
+        "samtools faidx {input.ref} {params.regions} > {output.tmp_genome} "
+
+rule process_dataset_reference:
+    input:
+        tmp_genome= BaseGenome.path(file_ending="/reference_tmp.fa"),
+    output:
+        base_genome = BaseGenome.path()
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python scripts/format_fasta_headers.py {input.tmp_genome} {output.base_genome}"
 
 
 # Simulates a set of variants that will be a source for a population
