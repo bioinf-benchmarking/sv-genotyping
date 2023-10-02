@@ -174,10 +174,10 @@ rule tabix:
 
 rule merge_1000genomes_variant_types:
     input:
-        snps_indels = RealVariantSource.path(variant_type="snps_indels"),
-        snps_indels_index = RealVariantSource.path(variant_type="snps_indels", file_ending="/variants.vcf.gz.tbi"),
-        svs = RealVariantSource.path(variant_type="svs"),
-        svs_index = RealVariantSource.path(variant_type="svs", file_ending="/variants.vcf.gz.tbi"),
+        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels"),
+        snps_indels_index = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz.tbi"),
+        svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs"),
+        svs_index = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz.tbi"),
     output:
         RealVariantSource.path(database_name="1000genomes", variant_type="all"),
     conda:
@@ -241,7 +241,9 @@ rule filter_real_population:
         "../envs/bcftools.yml"
     shell:
         #"bcftools view -S {input.sample_names} {input.vcf} | bcftools view -q {wildcards.allele_frequency} -o {output.vcf}"
-        "bcftools view -q {wildcards.allele_frequency} {input.vcf} | bcftools view -S {input.sample_names} -o {output.vcf}"
+        "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | "
+        #"bcftools view -q {wildcards.allele_frequency} {input.vcf} | "
+        "bcftools view -S {input.sample_names} -o {output.vcf}"
 
 
 

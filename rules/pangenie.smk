@@ -41,7 +41,7 @@ rule run_pangenie:
     input:
         reference = BaseGenome.path(),
         population_vcf = PopulationWithoutIndividual.path(file_ending="/population.multiallelic.vcf"),
-        reads = Reads.path(file_ending="/reads.fq")
+        reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="pangenie", file_ending="/genotypes_multiallelic.vcf")
     params:

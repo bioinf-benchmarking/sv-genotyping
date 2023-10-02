@@ -6,7 +6,7 @@ rule simulate_reads:
         index=BaseGenome.path(file_ending="/reference.fa.fai"),
         individual=Individual.path(),
     output:
-        Reads.path(file_ending="/reads.fq")
+        Reads.path(file_ending="/reads.fq.gz")
     threads:
         16
     params:
@@ -18,12 +18,22 @@ rule simulate_reads:
         --read-length {wildcards.read_length} \
         --random-seed {config[random_seed]} \
         --n-threads 16 \
-        --file-ending .fq \
+        --file-ending .fq.gz \
         {input.individual} \
         {input.reference} \
         {params.out_path}
         """
 
+
+"""
+rule compress_fastq:
+    input:
+        Reads.path(file_ending="/reads.fq")
+    output:
+        Reads.path(file_ending="/reads.fq.gz")
+    shell:
+        "gzip -c {input} > {output}"
+"""
 
 """
 rule uncompress_fastq:

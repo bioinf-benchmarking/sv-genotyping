@@ -7,6 +7,7 @@ genomes:
   # yeast
   sacCer3:
     remove_chr_prefix: False
+    input_is_biallelic: True
     small:
       chromosomes: "chrI"
     medium:
@@ -16,6 +17,7 @@ genomes:
 
   hg38:
     remove_chr_prefix: True
+    input_is_biallelic: True
     small:
       chromosomes: "21"
     medium:
@@ -33,6 +35,7 @@ genomes:
 
   chm13:
     remove_chr_prefix: False
+    input_is_biallelic: False
     tiny:
       chromosomes: "chr21:0-20000000"
     small:
@@ -40,6 +43,7 @@ genomes:
 
   # simulated genome sequence
   simulated1:
+    input_is_biallelic: True
     genome_size: 10000000
     n_chromosomes: 10
 

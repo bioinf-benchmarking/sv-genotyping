@@ -68,7 +68,8 @@ class SimulatedPopulation:
 @parameters
 class FilteredRealPopulation:
     population: RealVariantSource
-    allele_frequency: float = 0.1
+    allele_frequency_svs: float = 0.1
+    allele_frequency_snps_indels: float = 0.3
     n_individuals: int = 10
     file_ending = "/population.vcf"
 

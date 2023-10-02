@@ -105,10 +105,18 @@ recall = true_positive / (true_positive + false_negative)
 precision = true_positive / (true_positive + false_positive)
 f1_score = 2 * (precision * recall) / (precision + recall)
 """
+config = snakemake.config["genomes"]
+print(config)
+input_is_biallelic = config[snakemake.wildcards.genome_build]["input_is_biallelic"]
+print("Input is biallelic? ", input_is_biallelic)
 
-truth = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.truth, convert_to_biallelic=False)
-sample = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.genotypes, convert_to_biallelic=False)
-sample.normalize_against_reference_variants(truth)
+if not input_is_biallelic:
+    truth = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.truth, convert_to_biallelic=False)
+    sample = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input.genotypes, convert_to_biallelic=False)
+    sample.normalize_against_reference_variants(truth)
+else:
+    truth = IndexedGenotypes2.from_biallelic_vcf(snakemake.input.truth)
+    sample = IndexedGenotypes2.from_biallelic_vcf(snakemake.input.genotypes)
 
 accuracy = GenotypeAccuracy(truth, sample)
 recall = accuracy.recall()

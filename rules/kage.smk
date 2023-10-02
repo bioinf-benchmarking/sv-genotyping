@@ -26,7 +26,7 @@ rule kage_index:
        index = GenotypeResults.path(method="kage", file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 6 -k 31
         """
 
 
@@ -46,7 +46,7 @@ rule kage_index_multiallelic:
 rule run_kage_no_impuation:
     input:
         index = GenotypeResults.path(method="kage_no_imputation", file_ending="/index.npz"),
-        reads = Reads.path(file_ending="/reads.fq")
+        reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage_no_imputation")
     shell:
@@ -56,7 +56,7 @@ rule run_kage_no_impuation:
 rule run_kage:
     input:
         index = GenotypeResults.path(method="kage", file_ending="/index.npz"),
-        reads = Reads.path(file_ending="/reads.fq")
+        reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage"),
         node_counts = GenotypeResults.path(method="kage", file_ending="/genotypes.vcf.node_counts.npy")
@@ -68,7 +68,7 @@ rule run_kage:
 rule run_kage_multiallelic:
     input:
         index=GenotypeResults.path(method="kage_multiallelic", file_ending="/index.npz"),
-        reads=Reads.path(file_ending="/reads.fq")
+        reads=Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage_multiallelic"),
         node_counts=GenotypeResults.path(method="kage_multiallelic", file_ending="/genotypes.vcf.node_counts.npy")
