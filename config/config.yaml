@@ -18,6 +18,8 @@ genomes:
   hg38:
     remove_chr_prefix: True
     input_is_biallelic: True
+    tiny:
+      chromosomes: "chr21:0-20000000"
     small:
       chromosomes: "21"
     medium:

@@ -82,14 +82,14 @@ class Population:
 @parameters
 class PopulationWithoutIndividual:
     population: Population
-    individual_id: str = "simulated_1"
+    individual_id: int = 1
     file_ending = "/population.vcf"
 
 
 @parameters
 class Individual:
     population: Population
-    individual_id: str = "simulated_1"
+    individual_id: int = 1
     file_ending = "/individual.vcf"
 
 

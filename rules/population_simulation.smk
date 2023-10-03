@@ -15,27 +15,29 @@ rule simulate_population:
         """
 
 
+
 rule remove_individual_from_population:
     input:
-        population = Population.path()
+        population = Population.path(),
+        sample_name = Population.path(file_ending="/population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         population = PopulationWithoutIndividual.path()
     conda:
         "../envs/bcftools.yml"
     shell:
-        """
-        bcftools view --samples ^{wildcards.individual_id} -o {output.population} {input.population}
-        """
+        #"bcftools view --samples ^{wildcards.individual_id} -o {output.population} {input.population}"
+        "bcftools view --samples-file ^{input.sample_name} -o {output.population} {input.population}"
 
 
 rule extract_individual_from_population:
     input:
-        population = Population.path()
+        population = Population.path(),
+        sample_name= Population.path(file_ending="/population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         individual = Individual.path()
     conda:
         "../envs/bcftools.yml"
     shell:
         """
-        bcftools view --samples {wildcards.individual_id} -o {output.individual} {input.population}
+        bcftools view --samples-file {input.sample_name} -o {output.individual} {input.population}
         """

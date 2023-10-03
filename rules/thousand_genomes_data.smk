@@ -217,6 +217,17 @@ rule get_all_sample_names_from_vcf:
         "bcftools query -l {input} > {output}"
 
 
+rule get_all_sample_names_from_vcf_nogz:
+    input:
+        "{variants}.vcf"
+    output:
+        "{variants}.all_sample_names.txt"
+    conda:
+        "../envs/bcftools.yml"
+    shell:
+        "bcftools query -l {input} > {output}"
+
+
 rule get_random_sample_names_from_vcf:
     input:
         "{variants}.all_sample_names.txt"
@@ -228,6 +239,13 @@ rule get_random_sample_names_from_vcf:
         "python scripts/shuffle_lines.py {input} {config[random_seed]} {wildcards.n} {output}"
 
 
+rule get_random_sample_name_from_number:
+    input:
+        "{variants}.10000_random_sample_names.txt"  # 10000 to get all sample names as input
+    output:
+        "{variants}.random_sample_number_{n}.txt"
+    shell:
+        "head -n {wildcards.n} {input} | tail -n 1 > {output}"
 
 
 rule filter_real_population:

@@ -9,13 +9,11 @@ def get_individual_for_genotype_accuracy(wildcards):
     else:
         return Individual.path()
 
-
-
 rule genotype_accuracy:
     input:
         #truth = get_individual_for_genotype_accuracy,
         truth = Individual.path(file_ending="/individual.vcf"),
-        genotypes = GenotypeResults.path()
+        genotypes = lambda wildcards: GenotypeResults.path()
     output:
         recall = GenotypeRecall.path(),
         one_minus_precision = GenotypeOneMinusPrecision.path(),
@@ -24,6 +22,9 @@ rule genotype_accuracy:
     script:
         "../scripts/genotype_accuracy.py"
 
+
+
+"""
 rule genotype_accuracy_multiallelic:
     input:
         #truth = get_individual_for_genotype_accuracy,
@@ -36,7 +37,7 @@ rule genotype_accuracy_multiallelic:
 
 
 ruleorder: genotype_accuracy_multiallelic > genotype_accuracy
-
+"""
 
 rule kage_debug:
     input:

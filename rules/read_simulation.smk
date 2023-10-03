@@ -35,7 +35,6 @@ rule compress_fastq:
         "gzip -c {input} > {output}"
 """
 
-"""
 rule uncompress_fastq:
     input:
         fastq=Reads.path()
@@ -43,4 +42,3 @@ rule uncompress_fastq:
         fastq=Reads.path(file_ending="/reads.fq")
     shell:
         "gunzip -c {input} > {output}"
-"""
