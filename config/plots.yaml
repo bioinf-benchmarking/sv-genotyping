@@ -44,6 +44,15 @@ plots:
       n_individuals: [5, 25, 50]
 
 
+  plot1:
+    plot_type: f1_vs_n_individuals 
+    parameters:
+      size: "tiny"
+      genome: "hg38"
+      n_individuals: [5, 10, 50, 100, 500]
+      variant_type: "all"
+
+
 # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
 # Each of x_axis, y_axis, category_variable, color, labels, facet_col, facet_row
@@ -59,3 +68,8 @@ plot_types:
     facet_col: n_individuals
     facet_row: variant_type
 
+  f1_vs_n_individuals:
+    type: line
+    x: n_individuals
+    y: GenotypeF1Score
+    color: method

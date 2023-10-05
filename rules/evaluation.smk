@@ -9,11 +9,26 @@ def get_individual_for_genotype_accuracy(wildcards):
     else:
         return Individual.path()
 
+
+def genotype_accuracy_input(wildcards):
+    print(wildcards)
+    if "pangenie" in wildcards.method and int(wildcards.n_individuals) > 125:
+        return []
+    else:
+        out = [
+            Individual.path(file_ending="/individual.vcf"),
+            GenotypeResults.path()
+        ]
+        print(out)
+        return out
+
+
 rule genotype_accuracy:
     input:
+        genotype_accuracy_input
         #truth = get_individual_for_genotype_accuracy,
-        truth = Individual.path(file_ending="/individual.vcf"),
-        genotypes = lambda wildcards: GenotypeResults.path()
+        #truth = Individual.path(file_ending="/individual.vcf"),
+        #genotypes = GenotypeResults.path()
     output:
         recall = GenotypeRecall.path(),
         one_minus_precision = GenotypeOneMinusPrecision.path(),

@@ -8,7 +8,6 @@ configfile: "config/plots.yaml"
 workflow.use_conda = True
 
 from snakehelp import parameters, result
-from mapping_benchmarking.config import WholeGenomeReads, Individual
 import snakehelp
 snakehelp.set_data_folder("data/")
 
@@ -58,9 +57,9 @@ class RealVariantSourceSingleChromosome:
 @parameters
 class SimulatedPopulation:
     variants: SimulatedVariantSource
-    n_individuals: int = 10
     allele_frequency: float = 0.3
     correlation: float = 0.8
+    n_individuals: int = 10
     file_ending = "/population.vcf"
 
 
@@ -150,7 +149,7 @@ include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
 # for plotting
-include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
+#include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 
 
 
@@ -158,5 +157,5 @@ include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk"
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/read_simulation.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/mason.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
-#include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
+include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
 
