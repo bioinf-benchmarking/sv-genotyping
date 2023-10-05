@@ -47,10 +47,13 @@ plots:
   plot1:
     plot_type: f1_vs_n_individuals 
     parameters:
-      size: "tiny"
-      genome: "hg38"
+      size: small
+      genome_build: hg38
       n_individuals: [5, 10, 50, 100, 500]
-      variant_type: "all"
+      variant_type: all
+      method: ["kage"]
+    type_limits:
+      source: RealVariantSource
 
 
 # The following defines different type of plots

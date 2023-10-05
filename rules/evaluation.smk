@@ -4,6 +4,8 @@ def get_individual_for_genotype_accuracy(wildcards):
     print(Individual.from_flat_params(*wildcards).path(file_ending="/individual.vcf"))
     print(wildcards.method)
     print(Individual.path())
+    print("NAMES")
+    print([f.name for f in Individual.fields()])
     if "_multiallelic" in wildcards.method:
         return Individual.path(file_ending="/individual.multiallelic.vcf")
     else:

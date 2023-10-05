@@ -248,13 +248,17 @@ rule get_random_sample_name_from_number:
         "head -n {wildcards.n} {input} | tail -n 1 > {output}"
 
 
-rule filter_real_population:
+rule filter_population:
+    """For filtering any population (real or simulated) on number of individuals and allele frequency"""
     input:
-        vcf = RealVariantSource.path(),
-        index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
-        sample_names = RealVariantSource.path(file_ending="/variants.{n_individuals}_random_sample_names.txt")
+        #vcf = RealVariantSource.path(),
+        #index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
+        #sample_names = RealVariantSource.path(file_ending="/variants.{n_individuals}_random_sample_names.txt")
+        vcf = RawPopulation.path(),
+        index = RawPopulation.path(file_ending="/unfiltered_population.vcf.gz.tbi"),
+        sample_names = RawPopulation.path(file_ending="/unfiltered_population.{n_individuals}_random_sample_names.txt")
     output:
-        vcf = FilteredRealPopulation.path()
+        vcf = FilteredPopulation.path()
     conda:
         "../envs/bcftools.yml"
     shell:

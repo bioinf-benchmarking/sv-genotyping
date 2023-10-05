@@ -4,22 +4,24 @@ rule simulate_population:
     input:
         variant_source = SimulatedVariantSource.path()
     output:
+        tmp =  SimulatedPopulation.path(file_ending="/unfiltered_population.tmp.vcf.gz"),
         population = SimulatedPopulation.path()
     shell:
         """
         python3 scripts/population_simulation.py {input.variant_source} \
-        {output.population} \
-        {wildcards.n_individuals} \
+        {output.tmp} \
+        3000 \
         {wildcards.allele_frequency} \
-        {wildcards.correlation} 
+        {wildcards.correlation} \
+        && bgzip -c {output.tmp} > {output.population}
         """
 
 
 
 rule remove_individual_from_population:
     input:
-        population = Population.path(),
-        sample_name = Population.path(file_ending="/population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
+        population = FilteredPopulation.path(),
+        sample_name = FilteredPopulation.path(file_ending="/filtered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         population = PopulationWithoutIndividual.path()
     conda:
@@ -31,8 +33,8 @@ rule remove_individual_from_population:
 
 rule extract_individual_from_population:
     input:
-        population = Population.path(),
-        sample_name= Population.path(file_ending="/population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
+        population = FilteredPopulation.path(),
+        sample_name= FilteredPopulation.path(file_ending="/filtered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         individual = Individual.path()
     conda:

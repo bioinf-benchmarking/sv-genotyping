@@ -58,7 +58,7 @@ def simulate_population_genotype_matrix(n_variants: int, n_individuals: int, rat
     logging.info(f"Genotype matrix: {genotype_matrix}")
     logging.info("Allele frequencies genotype matrix: %s"  % (np.mean(haplotypes > 0, axis=1)))
 
-    return genotype_matrix
+    return genotype_matrix, allele_freq / (2*genotype_matrix.shape[1])
 
 
 @app.command()
@@ -74,7 +74,7 @@ def simulate_population_phased_vcf(vcf: str, out_file: str, n_individuals: int, 
     # if n_variants is large, we can just simulate a smaller matrix and reuse it
     n_variants_matrix = min(n_variants, 50000)
 
-    genotype_matrix = simulate_population_genotype_matrix(n_variants_matrix, n_individuals, ratio_non_ref_allele, correlation)
+    genotype_matrix, allele_frequencies = simulate_population_genotype_matrix(n_variants_matrix, n_individuals, ratio_non_ref_allele, correlation)
     genotype_strings = ["0|0", "0|1", "1|0", "1|1"]
 
     logging.info("Writing vcf")
@@ -85,6 +85,7 @@ def simulate_population_phased_vcf(vcf: str, out_file: str, n_individuals: int, 
                 if line.startswith("#"):
                     if line.lower().startswith("#chrom"):
                         out.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
+                        out.write("##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1)\">\n")
                         line = line.split()[0:9] + [f"simulated_{i}" for i in range(n_individuals)]
                         out.write("\t".join(line) + "\n")
                     else:
@@ -92,6 +93,7 @@ def simulate_population_phased_vcf(vcf: str, out_file: str, n_individuals: int, 
                     continue
 
                 fields = line.strip().split("\t")
+                fields[7] = "AF=%.2f;" % allele_frequencies[variant_id % n_variants_matrix]
                 fields[8] = "GT"
                 fields = fields[:9]
                 for i in range(0, n_individuals):

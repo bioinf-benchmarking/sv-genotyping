@@ -41,10 +41,10 @@ class SimulatedVariantSource:
 @parameters
 class RealVariantSource:
     base_genome: BaseGenome
-    folder_name: Literal["real_variants"]
+    folder_name: Literal["real_variants"] = "real_variants"
     database_name: Literal["1000genomes", "hprc"] = "1000genomes"
     variant_type: Literal["snps_indels", "svs", "all"] = "snps_indels"
-    file_ending = "/variants.vcf.gz"
+    file_ending = "/unfiltered_population.vcf.gz"
 
 
 @parameters
@@ -59,35 +59,35 @@ class SimulatedPopulation:
     variants: SimulatedVariantSource
     allele_frequency: float = 0.3
     correlation: float = 0.8
-    n_individuals: int = 10
-    file_ending = "/population.vcf"
-
+    file_ending = "/unfiltered_population.vcf.gz"
 
 
 @parameters
-class FilteredRealPopulation:
-    population: RealVariantSource
+class RawPopulation:
+    source: Union[RealVariantSource, SimulatedPopulation]
+    file_ending = "/unfiltered_population.vcf.gz"
+
+
+@parameters
+class FilteredPopulation:
+    """Population filtered on allele frequency"""
+    population: RawPopulation
     allele_frequency_svs: float = 0.1
     allele_frequency_snps_indels: float = 0.3
     n_individuals: int = 10
-    file_ending = "/population.vcf"
-
-@parameters
-class Population:
-    population: Union[FilteredRealPopulation, SimulatedPopulation]
-    file_ending = "/population.vcf"
+    file_ending = "/filtered_population.vcf.gz"
 
 
 @parameters
 class PopulationWithoutIndividual:
-    population: Population
+    population: FilteredPopulation
     individual_id: int = 1
     file_ending = "/population.vcf"
 
 
 @parameters
 class Individual:
-    population: Population
+    population: FilteredPopulation
     individual_id: int = 1
     file_ending = "/individual.vcf"
 
@@ -112,32 +112,34 @@ class GenotypeResults:
 @parameters
 class GenotypeDebug:
     genotype_results: GenotypeResults
-    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
     file_ending = "/debug.txt"
 
 
 @result
 class GenotypeReport:
     genotype_results: GenotypeResults
-    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 @result
 class GenotypeRecall:
     genotype_results: GenotypeResults
-    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 @result
 class GenotypeOneMinusPrecision:
     genotype_results: GenotypeResults
-    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
 
 @result
 class GenotypeF1Score:
     genotype_results: GenotypeResults
-    variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    
 
+#todo: This should only be needed to do in the specific plot that requires it
+RawPopulation.limit_union_choice("RealVariantSource")
 
-print("Path", Population.path())
 
 include: "rules/variant_simulation.smk"
 include: "rules/population_simulation.smk"

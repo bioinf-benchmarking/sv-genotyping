@@ -109,6 +109,9 @@ precision = true_positive / (true_positive + false_positive)
 f1_score = 2 * (precision * recall) / (precision + recall)
 """
 config = snakemake.config["genomes"]
+
+variant_type = snakemake.wildcards.limit_accuracy_to_variant_type
+
 if len(snakemake.input) == 0:
     accuracy = np.nan
     recall = np.nan
