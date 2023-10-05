@@ -151,7 +151,7 @@ include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
 # for plotting
-#include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
+include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 
 
 
@@ -159,5 +159,5 @@ include: "rules/hprc_data.smk"
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/read_simulation.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/mason.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
-include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
+#include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
 

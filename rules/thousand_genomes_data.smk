@@ -92,7 +92,7 @@ rule filter_1000genomes_svs:
     input:
         RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw.vcf.gz")
     output:
-        RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/filtered.vcf.gz")
+        RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz")
     conda:
         "../envs/filter_svs.yml"
     shell:
@@ -150,7 +150,7 @@ rule merge_1000genomes_snps_indels:
     input:
         snps_indels_files
     output:
-        RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels")
+        RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz")
     conda:
         "../envs/bcftools.yml"
     shell:
@@ -174,9 +174,9 @@ rule tabix:
 
 rule merge_1000genomes_variant_types:
     input:
-        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels"),
+        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz"),
         snps_indels_index = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz.tbi"),
-        svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs"),
+        svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz"),
         svs_index = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz.tbi"),
     output:
         RealVariantSource.path(database_name="1000genomes", variant_type="all"),
