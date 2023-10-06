@@ -112,33 +112,32 @@ class GenotypeResults:
 @parameters
 class GenotypeDebug:
     genotype_results: GenotypeResults
-    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
     file_ending = "/debug.txt"
 
 
 @result
 class GenotypeReport:
     genotype_results: GenotypeResults
-    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeRecall:
     genotype_results: GenotypeResults
-    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeOneMinusPrecision:
     genotype_results: GenotypeResults
-    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeF1Score:
     genotype_results: GenotypeResults
-    limit_accuracy_to_variant_type: Literal["all", "snps", "small_indels", "svs"] = "all"
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
     
 
-#todo: This should only be needed to do in the specific plot that requires it
-RawPopulation.limit_union_choice("RealVariantSource")
+print(FilteredPopulation.path())
 
 
 include: "rules/variant_simulation.smk"
@@ -160,4 +159,5 @@ include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk"
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/mason.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 #include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
+#include: "/home/ivar/dev/mapping-benchmarking/rules/plotting.smk"
 

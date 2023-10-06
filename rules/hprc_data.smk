@@ -11,7 +11,6 @@ class RawHPRCVariants:
     file_ending = "/variants.vcf.gz"
 
 
-
 rule downlad_raw_hprc_variants:
     output:
         protected(RawHPRCVariants.path())
@@ -24,10 +23,17 @@ rule downlad_raw_hprc_variants:
 #hprc needs no filtering
 rule get_hprc_variants:
     input:
-        RawHPRCVariants.path()
+        vcf = RawHPRCVariants.path(),
+        index = RawHPRCVariants.path(file_ending="/variants.vcf.gz.tbi")
     output:
-        RealVariantSource.path(database_name="hprc", variant_type="all", file_ending="/filtered.vcf.gz")
+        RealVariantSource.path(database_name="hprc", variant_type="all", file_ending="/unfiltered_population.vcf.gz")
+    params:
+        chromosomes = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"]
+    conda:
+        "../envs/bcftools.yml"
     shell:
-        "cp {input} {output}"
+        """
+        bcftools view --regions {params.chromosomes} {input.vcf} -Oz -o {output}
+        """
 
 

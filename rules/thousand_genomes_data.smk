@@ -92,7 +92,7 @@ rule filter_1000genomes_svs:
     input:
         RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw.vcf.gz")
     output:
-        RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz")
+        RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw_without_unknown_sequences.vcf.gz")
     conda:
         "../envs/filter_svs.yml"
     shell:
@@ -103,10 +103,10 @@ rule filter_1000genomes_svs:
 
 rule subset_variants_on_dataset_chromosomes:
     input:
-        vcf = RealVariantSource.path(file_ending="/variants.vcf.gz"),
-        index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
+        vcf = RealVariantSource.path(variant_type="svs", file_ending="/raw_without_unknown_sequences.vcf.gz"),
+        index = RealVariantSource.path(variant_type="svs", file_ending="/raw_without_unknown_sequences.vcf.gz.tbi"),
     output:
-        RealVariantSource.path()  # may need variant_type=svs to not conflict with snps/indels
+        RealVariantSource.path(variant_type="svs", file_ending="/unfiltered_population.vcf.gz")  # may need variant_type=svs to not conflict with snps/indels
     params:
         chromosomes = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"]
     conda:
@@ -208,13 +208,14 @@ rule merge_1000genomes_variant_types:
 
 rule get_all_sample_names_from_vcf:
     input:
-        "{variants}.vcf.gz"
+        vcf="{variants}.vcf.gz",
+        index="{variants}.vcf.gz.tbi"
     output:
         "{variants}.all_sample_names.txt"
     conda:
         "../envs/bcftools.yml"
     shell:
-        "bcftools query -l {input} > {output}"
+        "bcftools query -l {input.vcf} > {output}"
 
 
 rule get_all_sample_names_from_vcf_nogz:

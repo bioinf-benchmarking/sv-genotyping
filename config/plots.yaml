@@ -49,11 +49,12 @@ plots:
     parameters:
       size: small
       genome_build: hg38
-      n_individuals: [5, 10, 50, 100, 500, 1000, 2000]
+      n_individuals: [5, 10, 50, 100]
       variant_type: all
       allele_frequency_snps_indels: 0.01
       allele_frequency_svs: "0.00001"  # str to avoid scientific notation
       method: ["kage", "pangenie"]
+      limit_accuracy_to_variant_type: ["snps", "indels", "svs", "all"]
     type_limits:
       source: RealVariantSource
 
@@ -78,3 +79,4 @@ plot_types:
     x: n_individuals
     y: GenotypeF1Score
     color: method
+    facet_row: limit_accuracy_to_variant_type

@@ -134,7 +134,7 @@ else:
         truth = IndexedGenotypes2.from_biallelic_vcf(snakemake.input[0])
         sample = IndexedGenotypes2.from_biallelic_vcf(snakemake.input[1])
 
-    accuracy = GenotypeAccuracy(truth, sample)
+    accuracy = GenotypeAccuracy(truth, sample, limit_to=variant_type)
     recall = accuracy.recall()
     precision = accuracy.precision()
     f1_score = accuracy.f1()

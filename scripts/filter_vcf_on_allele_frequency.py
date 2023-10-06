@@ -5,6 +5,7 @@ import numpy as np
 import bionumpy as bnp
 import sys
 import tqdm
+import npstructures as nps
 
 in_file = sys.argv[1]
 sv_frequency = float(sys.argv[2])
@@ -21,7 +22,16 @@ with bnp.open(in_file, buffer_type=bnp.io.VCFBuffer) as f:
         af_strings = info_fields[bnp.str_equal(info_fields[:, 0:3], "AF=")]
         assert len(af_strings) == len(chunk), "Not all lines contain AF=?"
 
-        afs = np.array([float(af_string.to_string()) for af_string in af_strings[:, 3:]])
+        #afs = np.array([float(af_string.to_string()) for af_string in af_strings[:, 3:]])
+        afs = (af_string.to_string() for af_string in af_strings[:, 3:])
+        afs = nps.RaggedArray(
+            [
+                [float(af) for af in af_string.split(",")]
+                for af_string in afs
+            ]
+        )
+        # use highest af
+        afs = np.max(afs, axis=-1)
 
         keep = (is_sv & (afs >= sv_frequency)) | (~is_sv & (afs >= snps_indels_frequency))
         to_keep.append(keep)
