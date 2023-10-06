@@ -8,7 +8,7 @@ rule simulate_reads:
     output:
         Reads.path(file_ending="/reads.fq.gz")
     threads:
-        16
+        4
     params:
         out_path = lambda wildcards, input, output: os.path.sep.join(output[0].split(os.path.sep)[:-1]),
     shell:
@@ -17,7 +17,7 @@ rule simulate_reads:
         --coverage {wildcards.coverage} \
         --read-length {wildcards.read_length} \
         --random-seed {config[random_seed]} \
-        --n-threads 16 \
+        --n-threads 4 \
         --file-ending .fq.gz \
         {input.individual} \
         {input.reference} \

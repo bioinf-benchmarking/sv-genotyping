@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - bcftools=1.4.1
+  - tabix
   - openssl=1.0
   - python=3
   - pip:

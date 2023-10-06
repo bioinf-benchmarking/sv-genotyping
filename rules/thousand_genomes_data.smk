@@ -103,8 +103,8 @@ rule filter_1000genomes_svs:
 
 rule subset_variants_on_dataset_chromosomes:
     input:
-        vcf = RealVariantSource.path(file_ending="/filtered.vcf.gz"),
-        index = RealVariantSource.path(file_ending="/filtered.vcf.gz.tbi"),
+        vcf = RealVariantSource.path(file_ending="/variants.vcf.gz"),
+        index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
     output:
         RealVariantSource.path()  # may need variant_type=svs to not conflict with snps/indels
     params:
@@ -145,7 +145,7 @@ def all_files(wildcarsd):
     return [FilteredOnSamples1000GenomesVariants.path(chromosome=chromosome) for chromosome in chromosomes] + \
             [FilteredOnSamples1000GenomesStructuralVariants.path()]
 
-
+# not used??
 rule merge_1000genomes_snps_indels:
     input:
         snps_indels_files
@@ -174,10 +174,10 @@ rule tabix:
 
 rule merge_1000genomes_variant_types:
     input:
-        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz"),
-        snps_indels_index = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz.tbi"),
-        svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz"),
-        svs_index = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/variants.vcf.gz.tbi"),
+        snps_indels = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/unfiltered_population.vcf.gz"),
+        snps_indels_index = RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/unfiltered_population.vcf.gz.tbi"),
+        svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/unfiltered_population.vcf.gz"),
+        svs_index = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/unfiltered_population.vcf.gz.tbi"),
     output:
         RealVariantSource.path(database_name="1000genomes", variant_type="all"),
     conda:
@@ -265,7 +265,7 @@ rule filter_population:
         #"bcftools view -S {input.sample_names} {input.vcf} | bcftools view -q {wildcards.allele_frequency} -o {output.vcf}"
         "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | "
         #"bcftools view -q {wildcards.allele_frequency} {input.vcf} | "
-        "bcftools view -S {input.sample_names} -o {output.vcf}"
+        "bcftools view -S {input.sample_names} -O z -o {output.vcf}"
 
 
 
