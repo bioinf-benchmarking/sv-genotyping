@@ -23,6 +23,8 @@ rule kage_index:
         population_vcf = FilteredPopulation.path(),
     output:
        index = GenotypeResults.path(method="kage", file_ending="/index.npz")
+    threads:
+        lambda wildcards: int(wildcards.n_threads)
     shell:
         """
         kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
@@ -46,6 +48,8 @@ rule run_kage:
     output:
         results = GenotypeResults.path(method="kage"),
         node_counts = GenotypeResults.path(method="kage", file_ending="/genotypes.vcf.node_counts.npy")
+    threads:
+        lambda wildcards: int(wildcards.n_threads)
     shell:
         "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage} -k 31"
 

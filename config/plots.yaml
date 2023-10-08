@@ -90,7 +90,28 @@ plots:
     layout:
       xaxis_type: log
 
-# The following defines different type of plots
+  plot3_simulated:
+    plot_type: sv_accuracy_vs_snp_rate
+    parameters:
+      size: medium
+      genome_build: sacCer3
+      n_individuals: 50
+      allele_frequency_snps_indels: [ 0.0001, 0.001, 0.01, 0.1, 0.25, 0.5 ]
+      allele_frequency_svs: 0
+      method: [ "kage" ]
+      limit_accuracy_to_variant_type: "svs"
+      snp_rate: 0.01
+      small_indel_rate: 0.01
+      sv_indel_rate: 0.005
+      n_threads: 4
+    type_limits:
+      source: SimulatedPopulation
+    layout:
+      xaxis_type: log
+
+
+
+  # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
 # Each of x_axis, y_axis, category_variable, color, labels, facet_col, facet_row
 # should be either a result_type or a parameter_type if set

@@ -3,22 +3,22 @@
 # assign IDs to all alleles
 rule add_ids:
     input:
-        vcf="{file}.vcf"
+        vcf="{file}.vcf.gz"
         #vcf=PopulationWithoutIndividual.path()
     output:
         vcf = "{file}.with_ids.vcf"
         #vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),
     shell:
-        'cat {input} | python3 scripts/pangenie_add_ids.py > {output}'
+        'zcat {input} | python3 scripts/pangenie_add_ids.py > {output}'
 
 
 # merge variants into a pangenome graph
 rule merge_haplotypes:
     input:
-        vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),
+        vcf=FilteredPopulation.path(file_ending="/filtered_population.with_ids.vcf"),
         reference = BaseGenome.path(),
     output:
-        population_vcf = PopulationWithoutIndividual.path(file_ending="/population.multiallelic.vcf"),
+        population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
     shell:
         """
         python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output}
@@ -40,12 +40,14 @@ rule merge_individual_haplotypes:
 rule run_pangenie:
     input:
         reference = BaseGenome.path(),
-        population_vcf = PopulationWithoutIndividual.path(file_ending="/population.multiallelic.vcf"),
+        population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
         reads = Reads.path(file_ending="/reads.fq")
     output:
         results = GenotypeResults.path(method="pangenie", file_ending="/genotypes_multiallelic.vcf")
     params:
         jellyfish_memory = lambda wildcards: 3000000000 if wildcards.size == "big" else 300000000
+    threads:
+        lambda wildcards: int(wildcards.n_threads)
     shell:
         """
          PanGenie -i {input.reads} \
@@ -71,7 +73,7 @@ rule run_pangenie_multiallelic:
 
 rule convert_pangenie_genotypes_back_to_biallelic:
     input:
-        callset_vcf=PopulationWithoutIndividual.path(file_ending="/population.with_ids.vcf"),
+        callset_vcf=FilteredPopulation.path(file_ending="/filtered_population.with_ids.vcf"),
         vcf = GenotypeResults.path(method="pangenie",file_ending="/genotypes_multiallelic.vcf")
     output:
         vcf = GenotypeResults.path(method="pangenie",file_ending="/genotypes.vcf")

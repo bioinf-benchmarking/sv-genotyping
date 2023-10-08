@@ -114,7 +114,7 @@ class ReadsAndFilteredPopulation:
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
     method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic"] = "kage"
-    n_threads: int = 1
+    n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
 
