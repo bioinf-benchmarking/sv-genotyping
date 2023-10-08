@@ -58,6 +58,37 @@ plots:
     type_limits:
       source: RealVariantSource
 
+  plot2:
+    plot_type: f1_vs_n_individuals
+    parameters:
+      size: medium6
+      genome_build: hg38
+      n_individuals: [ 5, 50, 125, 500, 2500]
+      variant_type: all
+      allele_frequency_snps_indels: 0.01
+      allele_frequency_svs: 0
+      method: [ "kage", "pangenie" ]
+      limit_accuracy_to_variant_type: [ "snps", "indels", "svs", "all" ]
+    type_limits:
+      source: RealVariantSource
+    layout:
+      xaxis_type: log
+
+  plot3:
+    plot_type: sv_accuracy_vs_snp_rate
+    parameters:
+      size: medium6
+      genome_build: hg38
+      n_individuals: 125
+      variant_type: all
+      allele_frequency_snps_indels: [0.0001, 0.001, 0.01, 0.1, 0.25, 0.5]
+      allele_frequency_svs: 0
+      method: [ "kage", "pangenie" ]
+      limit_accuracy_to_variant_type: "svs"
+    type_limits:
+      source: RealVariantSource
+    layout:
+      xaxis_type: log
 
 # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
@@ -80,3 +111,9 @@ plot_types:
     y: GenotypeF1Score
     color: method
     facet_row: limit_accuracy_to_variant_type
+
+  sv_accuracy_vs_snp_rate:
+    type: line
+    x: allele_frequency_snps_indels
+    y: GenotypeF1Score
+    color: method

@@ -26,7 +26,7 @@ rule kage_index:
        index = GenotypeResults.path(method="kage", file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 6 -k 31
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
         """
 
 

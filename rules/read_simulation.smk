@@ -6,7 +6,7 @@ rule simulate_reads:
         index=BaseGenome.path(file_ending="/reference.fa.fai"),
         individual=Individual.path(),
     output:
-        Reads.path(file_ending="/reads.fq.gz")
+        Reads.path(file_ending="/reads.fq.gz.old")
     threads:
         4
     params:
@@ -22,6 +22,26 @@ rule simulate_reads:
         {input.individual} \
         {input.reference} \
         {params.out_path}
+        """
+
+rule simulate_reads2:
+    input:
+        reference=BaseGenome.path(),
+        index=BaseGenome.path(file_ending="/reference.fa.fai"),
+        individual=Individual.path(),
+    output:
+        Reads.path(file_ending="/reads.fq.gz")
+    threads:
+        4
+    shell:
+        """
+        kage simulate_reads \
+        --coverage {wildcards.coverage} \
+        --read-length {wildcards.read_length} \
+        --random-seed {config[random_seed]} \
+        -o {output} \
+        --vcf {input.individual} \
+        --fasta {input.reference} \
         """
 
 

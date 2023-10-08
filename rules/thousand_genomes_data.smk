@@ -150,7 +150,7 @@ rule merge_1000genomes_snps_indels:
     input:
         snps_indels_files
     output:
-        RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/variants.vcf.gz")
+        RealVariantSource.path(database_name="1000genomes", variant_type="snps_indels", file_ending="/unfiltered_population.vcf.gz")
     conda:
         "../envs/bcftools.yml"
     shell:
