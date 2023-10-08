@@ -18,28 +18,30 @@ rule simulate_population:
 
 
 
+# Removes an individual from a population
+# Then also removes variants that only that individual had (using --min-ac 1)
 rule remove_individual_from_population:
     input:
-        population = FilteredPopulation.path(),
-        sample_name = FilteredPopulation.path(file_ending="/filtered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
+        population = RawPopulation.path(),
+        sample_name = RawPopulation.path(file_ending="/unfiltered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         population = PopulationWithoutIndividual.path()
     conda:
         "../envs/bcftools.yml"
     shell:
         #"bcftools view --samples ^{wildcards.individual_id} -o {output.population} {input.population}"
-        "bcftools view --samples-file ^{input.sample_name} -o {output.population} {input.population}"
+        "bcftools view --samples-file ^{input.sample_name} {input.population} | bcftools view --min-ac 1 -O z -o {output.population}"
 
 
 rule extract_individual_from_population:
     input:
-        population = FilteredPopulation.path(),
-        sample_name= FilteredPopulation.path(file_ending="/filtered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
+        population = RawPopulation.path(),
+        sample_name= RawPopulation.path(file_ending="/unfiltered_population.random_sample_number_{individual_id}.txt")  # this file contains a random seeded sample name
     output:
         individual = Individual.path()
     conda:
         "../envs/bcftools.yml"
     shell:
         """
-        bcftools view --samples-file {input.sample_name} -o {output.individual} {input.population}
+        bcftools view --samples-file {input.sample_name} {input.population} -o {output.individual}
         """

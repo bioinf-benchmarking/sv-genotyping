@@ -255,9 +255,9 @@ rule filter_population:
         #vcf = RealVariantSource.path(),
         #index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
         #sample_names = RealVariantSource.path(file_ending="/variants.{n_individuals}_random_sample_names.txt")
-        vcf = RawPopulation.path(),
-        index = RawPopulation.path(file_ending="/unfiltered_population.vcf.gz.tbi"),
-        sample_names = RawPopulation.path(file_ending="/unfiltered_population.{n_individuals}_random_sample_names.txt")
+        vcf = PopulationWithoutIndividual.path(),
+        index = PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi"),
+        sample_names = PopulationWithoutIndividual.path(file_ending="/population_without_individual.{n_individuals}_random_sample_names.txt")
     output:
         vcf = FilteredPopulation.path()
     conda:

@@ -69,9 +69,23 @@ class RawPopulation:
 
 
 @parameters
+class PopulationWithoutIndividual:
+    population: RawPopulation
+    individual_id: int = 1
+    file_ending = "/population_without_individual.vcf.gz"
+
+
+@parameters
+class Individual:
+    population: RawPopulation
+    individual_id: int = 1
+    file_ending = "/individual.vcf"
+
+
+@parameters
 class FilteredPopulation:
     """Population filtered on allele frequency"""
-    population: RawPopulation
+    population: PopulationWithoutIndividual
     allele_frequency_svs: float = 0.1
     allele_frequency_snps_indels: float = 0.3
     n_individuals: int = 10
@@ -79,23 +93,18 @@ class FilteredPopulation:
 
 
 @parameters
-class PopulationWithoutIndividual:
-    population: FilteredPopulation
-    individual_id: int = 1
-    file_ending = "/population.vcf"
-
-
-@parameters
-class Individual:
-    population: FilteredPopulation
-    individual_id: int = 1
-    file_ending = "/individual.vcf"
-
-
-@parameters
 class Reads:
     # Reads are implicitly simulated from the individual that is removed from the population
-    population_without_individual: PopulationWithoutIndividual
+    individual: Individual
+    read_length: int = 150
+    coverage: float = 10.0
+    file_ending = "/reads.fq.gz"
+
+
+@parameters
+# Necessay to group reads and population so that GenotypeResults have one dependency
+class ReadsAndFilteredPopulation:
+    population: FilteredPopulation  # FilteredPopulation has reference to Individual
     read_length: int = 150
     coverage: float = 10.0
     file_ending = "/reads.fq.gz"
@@ -103,7 +112,7 @@ class Reads:
 
 @parameters
 class GenotypeResults:
-    reads: Reads
+    reads: ReadsAndFilteredPopulation
     method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic"] = "kage"
     n_threads: int = 1
     file_ending = "/genotypes.vcf"

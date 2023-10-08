@@ -45,6 +45,15 @@ rule simulate_reads2:
         """
 
 
+rule cp_reads_to_filtered_population:
+    input:
+        reads=Reads.path(),
+    output:
+        reads=ReadsAndFilteredPopulation.path()
+    shell:
+        "cp {input} {output}"
+
+
 """
 rule compress_fastq:
     input:

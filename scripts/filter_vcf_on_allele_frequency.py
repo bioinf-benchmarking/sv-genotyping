@@ -18,7 +18,8 @@ with bnp.open(in_file, buffer_type=bnp.io.VCFBuffer) as f:
         is_sv = (chunk.ref_seq.shape[1] >= 50) | (chunk.alt_seq.shape[1] >= 50)
 
         # hacky way to get allele frequency fast
-        info_fields = bnp.io.strops.split(chunk.info.ravel(), sep=";")
+        info_fields = bnp.io.strops.join(chunk.info, ";")
+        info_fields = bnp.io.strops.split(info_fields, sep=";")
         af_strings = info_fields[bnp.str_equal(info_fields[:, 0:3], "AF=")]
         assert len(af_strings) == len(chunk), "Not all lines contain AF=?"
 

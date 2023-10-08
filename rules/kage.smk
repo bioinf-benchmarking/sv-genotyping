@@ -8,38 +8,24 @@ rule remove_genotype_info:
 rule kage_no_impuation_index:
     input:
         reference=BaseGenome.path(),
-        population_vcf=PopulationWithoutIndividual.path(),
-        population_vcf_no_genotypes=PopulationWithoutIndividual.path(file_ending="/population_no_genotypes.vcf"),
+        population_vcf=FilteredPopulation.path(),
     output:
         index = GenotypeResults.path(method="kage_no_imputation",file_ending="/index.npz")
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} -V {input.population_vcf_no_genotypes} --modulo 200000033 --variant-window 4
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} --modulo 200000033 --variant-window 7 -k 31
         """
 
 
 rule kage_index:
     input:
         reference = BaseGenome.path(),
-        population_vcf = PopulationWithoutIndividual.path(),
+        population_vcf = FilteredPopulation.path(),
     output:
        index = GenotypeResults.path(method="kage", file_ending="/index.npz")
     shell:
         """
         kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
-        """
-
-
-# Runs kage index on a multiallelic vcf (for testing that that also works)
-rule kage_index_multiallelic:
-    input:
-        reference = BaseGenome.path(),
-        population_vcf = PopulationWithoutIndividual.path(file_ending="/population.multiallelic.vcf"),
-    output:
-       index = GenotypeResults.path(method="kage_multiallelic", file_ending="/index.npz")
-    shell:
-        """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 6 -k 31
         """
 
 
