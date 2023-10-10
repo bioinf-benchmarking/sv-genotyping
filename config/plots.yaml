@@ -53,7 +53,7 @@ plots:
       variant_type: all
       allele_frequency_snps_indels: 0.01
       allele_frequency_svs: "0.00001"  # str to avoid scientific notation
-      method: ["kage", "pangenie"]
+      method: ["kage", "pangenie", "paragraph"]
       limit_accuracy_to_variant_type: ["snps", "indels", "svs", "all"]
     type_limits:
       source: RealVariantSource

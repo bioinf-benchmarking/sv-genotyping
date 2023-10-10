@@ -14,7 +14,7 @@ snps_indels_frequency = float(sys.argv[3])
 to_keep = []
 
 with bnp.open(in_file, buffer_type=bnp.io.VCFBuffer) as f:
-    for chunk in f.read_chunks(20000000):
+    for chunk in f.read_chunks(200000000):
         is_sv = (chunk.ref_seq.shape[1] >= 50) | (chunk.alt_seq.shape[1] >= 50)
 
         # hacky way to get allele frequency fast

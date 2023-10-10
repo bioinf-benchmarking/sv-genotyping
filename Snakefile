@@ -83,11 +83,19 @@ class Individual:
 
 
 @parameters
-class FilteredPopulation:
-    """Population filtered on allele frequency"""
+class AlleleFrequencyFilteredPopulation:
     population: PopulationWithoutIndividual
     allele_frequency_svs: float = 0.1
     allele_frequency_snps_indels: float = 0.3
+    file_ending = "/allele_frequency_filtered_population.vcf.gz"
+
+
+@parameters
+class FilteredPopulation:
+    """Population filtered on allele frequency"""
+    population: AlleleFrequencyFilteredPopulation
+    #allele_frequency_svs: float = 0.1
+    #allele_frequency_snps_indels: float = 0.3
     n_individuals: int = 10
     file_ending = "/filtered_population.vcf.gz"
 
@@ -113,7 +121,7 @@ class ReadsAndFilteredPopulation:
 @parameters
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
-    method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic"] = "kage"
+    method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic", "paragraph"] = "kage"
     n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
@@ -144,7 +152,12 @@ class GenotypeOneMinusPrecision:
 class GenotypeF1Score:
     genotype_results: GenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
-    
+
+@result
+class Runtime:
+    genotype_results: GenotypeResults
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
 
 print(FilteredPopulation.path())
 
@@ -158,6 +171,8 @@ include: "rules/kage.smk"
 include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
+include: "rules/bwa.smk"
+include: "rules/paragraph.smk"
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 

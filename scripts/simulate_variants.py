@@ -18,7 +18,9 @@ def simulate(base_genome: str, snp_rate: float, small_indel_rate: float, sv_inde
                                           snp_rate,
                                           small_indel_rate,
                                           sv_indel_rate):
-            print(variants)
+            # remove variants close to start of chrom
+            # some genotypers (paragraph) don't like that
+            variants = variants[variants.position >= 150]
             f.write(variants)
 
     # add header

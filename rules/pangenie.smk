@@ -19,9 +19,11 @@ rule merge_haplotypes:
         reference = BaseGenome.path(),
     output:
         population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
+        population_vcfgz = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf.gz"),
     shell:
         """
-        python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output}
+        python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output.population_vcf} &&
+        bgzip -c {output.population_vcf} > {output.population_vcfgz} 
         """
 
 
@@ -31,9 +33,11 @@ rule merge_individual_haplotypes:
         reference = BaseGenome.path(),
     output:
         vcf = Individual.path(file_ending="/individual.multiallelic.vcf"),
+        vcfgz= Individual.path(file_ending="/individual.multiallelic.vcf.gz"),
     shell:
         """
-        python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output}
+        python3 scripts/pangenie_merge_vcfs.py merge -vcf {input.vcf} -r {input.reference} -ploidy 2 > {output} &&
+        bgzip -c {output.vcf} > {output.vcfgz} 
         """
 
 
@@ -48,6 +52,8 @@ rule run_pangenie:
         jellyfish_memory = lambda wildcards: 3000000000 if wildcards.size == "big" else 300000000
     threads:
         lambda wildcards: int(wildcards.n_threads)
+    benchmark:
+        GenotypeResults.path(method="pangenie", file_ending="/benchmark.csv")
     shell:
         """
          PanGenie -i {input.reads} \

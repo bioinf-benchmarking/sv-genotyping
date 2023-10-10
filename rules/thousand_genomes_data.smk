@@ -249,24 +249,30 @@ rule get_random_sample_name_from_number:
         "head -n {wildcards.n} {input} | tail -n 1 > {output}"
 
 
+rule filter_population_allele_frequency:
+    input:
+        vcf= PopulationWithoutIndividual.path(),
+        index=PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi"),
+    output:
+        vcf = AlleleFrequencyFilteredPopulation.path()
+    conda:
+        "../envs/bcftools.yml"
+    shell:
+        "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | bgzip -c > {output.vcf}"
+
+
 rule filter_population:
     """For filtering any population (real or simulated) on number of individuals and allele frequency"""
     input:
-        #vcf = RealVariantSource.path(),
-        #index = RealVariantSource.path(file_ending="/variants.vcf.gz.tbi"),
-        #sample_names = RealVariantSource.path(file_ending="/variants.{n_individuals}_random_sample_names.txt")
-        vcf = PopulationWithoutIndividual.path(),
-        index = PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi"),
+        vcf = AlleleFrequencyFilteredPopulation.path(),
+        index = AlleleFrequencyFilteredPopulation.path(file_ending="/allele_frequency_filtered_population.vcf.gz.tbi"),
         sample_names = PopulationWithoutIndividual.path(file_ending="/population_without_individual.{n_individuals}_random_sample_names.txt")
     output:
         vcf = FilteredPopulation.path()
     conda:
         "../envs/bcftools.yml"
     shell:
-        #"bcftools view -S {input.sample_names} {input.vcf} | bcftools view -q {wildcards.allele_frequency} -o {output.vcf}"
-        "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | "
-        #"bcftools view -q {wildcards.allele_frequency} {input.vcf} | "
-        "bcftools view -S {input.sample_names} -O z -o {output.vcf}"
+        "bcftools view -S {input.sample_names} -O z -o {output.vcf} {input.vcf}"
 
 
 
