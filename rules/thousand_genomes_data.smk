@@ -101,6 +101,7 @@ rule filter_1000genomes_svs:
         "kage preprocess_sv_vcf -v {input.variants} -f {input.reference} | bgzip -c > {output}"
 
 
+
 rule subset_variants_on_dataset_chromosomes:
     input:
         vcf = RealVariantSource.path(variant_type="svs", file_ending="/raw_without_unknown_sequences.vcf.gz"),
@@ -139,13 +140,14 @@ def snps_indels_files(wildcards):
     return [RealVariantSourceSingleChromosome.path(database_name="1000genomes", variant_type="snps_indels", chromosome=chromosome) for chromosome in chromosomes]
 
 
-def all_files(wildcarsd):
+def all_files(wildcards):
     chromosomes = config["real_datasets"]["1000genomes"]["chromosomes"].split(",")
     print(chromosomes)
     return [FilteredOnSamples1000GenomesVariants.path(chromosome=chromosome) for chromosome in chromosomes] + \
             [FilteredOnSamples1000GenomesStructuralVariants.path()]
 
 # not used??
+
 rule merge_1000genomes_snps_indels:
     input:
         snps_indels_files
@@ -179,7 +181,7 @@ rule merge_1000genomes_variant_types:
         svs = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/unfiltered_population.vcf.gz"),
         svs_index = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/unfiltered_population.vcf.gz.tbi"),
     output:
-        RealVariantSource.path(database_name="1000genomes", variant_type="all"),
+        RealVariantSource.path(database_name="1000genomes", variant_type="all", file_ending="/unfiltered_population_all.vcf.gz"),
     conda:
         "../envs/bcftools.yml"
     shell:
@@ -193,6 +195,16 @@ rule merge_1000genomes_variant_types:
         tabix -p vcf {input.snps_indels}.subset.vcf.gz &&
         tabix -p vcf {input.svs}.subset.vcf.gz &&
         bcftools concat --allow-overlaps {input.snps_indels}.subset.vcf.gz {input.svs}.subset.vcf.gz -Oz -o {output}
+        """
+
+rule remove_snps_indels_inside_svs:
+    input:
+        RealVariantSource.path(database_name="1000genomes",variant_type="all",file_ending="/unfiltered_population_all.vcf.gz"),
+    output:
+        RealVariantSource.path(database_name="1000genomes",variant_type="all",file_ending="/unfiltered_population.vcf.gz")
+    shell:
+        """
+        kage filter_snps_indels_covered_by_svs --vcf {input} -l 50 | bgzip -c > {output}
         """
 
 
