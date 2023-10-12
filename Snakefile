@@ -106,6 +106,7 @@ class Reads:
     individual: Individual
     read_length: int = 150
     coverage: float = 10.0
+    snp_error_rate: float = 0.001
     file_ending = "/reads.fq.gz"
 
 
@@ -115,6 +116,7 @@ class ReadsAndFilteredPopulation:
     population: FilteredPopulation  # FilteredPopulation has reference to Individual
     read_length: int = 150
     coverage: float = 10.0
+    snp_error_rate: float = 0.001
     file_ending = "/reads.fq.gz"
 
 
@@ -154,7 +156,7 @@ class GenotypeF1Score:
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
-class Runtime:
+class GenotypeRuntime:
     genotype_results: GenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 

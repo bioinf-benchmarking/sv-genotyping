@@ -76,7 +76,7 @@ rule get_runtime:
         GenotypeResults.as_output(file_ending="/benchmark.csv")
         #f"data/{parameters.until('n_threads')}/benchmark.csv"
     output:
-        Runtime.path()
+        GenotypeRuntime.path()
         #f"data/{parameters}/runtime.txt"
     shell:
         "cat {input} | tail -n 1 | cut -f 1 > {output}"

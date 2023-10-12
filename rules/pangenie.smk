@@ -41,14 +41,32 @@ rule merge_individual_haplotypes:
         """
 
 
-rule run_pangenie:
+rule pangenie_index:
     input:
         reference = BaseGenome.path(),
         population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
+    output:
+        GenotypeResults.path(method="pangenie", file_ending=["/index_path_segments.fasta", "/index_UniqueKmersMap.cereal"])
+    params:
+        out_prefix = lambda wildcards, input, output: output[0].replace("index_path_segments.fasta", "index")
+    threads:
+        lambda wildcards: int(wildcards.n_threads)
+    shell:
+        """
+        PanGenie-index -v {input.population_vcf} -r {input.reference} -t {wildcards.n_threads} -o {params.out_prefix}
+        """
+
+
+rule run_pangenie:
+    input:
+        #reference = BaseGenome.path(),
+        #population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
+        index = GenotypeResults.path(method="pangenie", file_ending="/index_path_segments.fasta"),
         reads = Reads.path(file_ending="/reads.fq")
     output:
         results = GenotypeResults.path(method="pangenie", file_ending="/genotypes_multiallelic.vcf")
     params:
+        index_prefix = lambda wildcards, input, output: input.index.replace("index_path_segments.fasta", "index"),
         jellyfish_memory = lambda wildcards: 3000000000 if wildcards.size == "big" else 300000000
     threads:
         lambda wildcards: int(wildcards.n_threads)
@@ -57,8 +75,7 @@ rule run_pangenie:
     shell:
         """
          PanGenie -i {input.reads} \
-         -r {input.reference} \
-         -v {input.population_vcf} \
+         -f {params.index_prefix} \
          -e {params.jellyfish_memory} \
          -o {output.results} \
          -t {wildcards.n_threads} \

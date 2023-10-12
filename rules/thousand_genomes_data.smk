@@ -90,15 +90,15 @@ rule download_1000genomes_svs:
 #only keeping SVs with known sequences
 rule filter_1000genomes_svs:
     input:
-        RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw.vcf.gz")
+        variants = RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw.vcf.gz"),
+        reference = ReferenceGenome.path()
     output:
         RealVariantSource.path(database_name="1000genomes", variant_type="svs", file_ending="/raw_without_unknown_sequences.vcf.gz")
-    conda:
-        "../envs/filter_svs.yml"
+    #conda:
+    #    "../envs/bcftools.yml"
     shell:
-        """
-        python scripts/filter_svs.py {input} | bgzip -c > {output}
-        """
+        #"python scripts/filter_svs.py {input} | bgzip -c > {output}"
+        "kage preprocess_sv_vcf -v {input.variants} -f {input.reference} | bgzip -c > {output}"
 
 
 rule subset_variants_on_dataset_chromosomes:
