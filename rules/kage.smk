@@ -36,7 +36,8 @@ rule kage_index:
         lambda wildcards: int(wildcards.n_threads)
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
+        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  \
+        --make-helper-model True --modulo 200000033 --variant-window 5 -k 31
         """
 
 

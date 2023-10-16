@@ -72,10 +72,10 @@ rule process_dataset_reference:
         tmp_genome= BaseGenome.path(file_ending="/reference_tmp.fa"),
     output:
         base_genome = BaseGenome.path()
-    conda:
-        "../envs/python.yml"
+    #conda:
+    #    "../envs/python.yml"
     shell:
-        "python scripts/format_fasta_headers.py {input.tmp_genome} {output.base_genome}"
+        "python3 scripts/format_fasta_headers.py {input.tmp_genome} {output.base_genome}"
 
 
 # Simulates a set of variants that will be a source for a population

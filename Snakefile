@@ -111,6 +111,12 @@ class Reads:
 
 
 @parameters
+class RealRawReads:
+    individual: Individual
+    file_ending = "/real_reads.fq.gz"
+
+
+@parameters
 # Necessay to group reads and population so that GenotypeResults have one dependency
 class ReadsAndFilteredPopulation:
     population: FilteredPopulation  # FilteredPopulation has reference to Individual
@@ -123,7 +129,7 @@ class ReadsAndFilteredPopulation:
 @parameters
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
-    method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "pangenie_multiallelic", "paragraph"] = "kage"
+    method: Literal["pangenie", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph"] = "kage"
     n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
@@ -161,6 +167,7 @@ class GenotypeRuntime:
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 
+
 print(FilteredPopulation.path())
 
 
@@ -175,6 +182,9 @@ include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
 include: "rules/bwa.smk"
 include: "rules/paragraph.smk"
+include: "rules/real_reads.smk"
+include: "rules/glimpse.smk"
+
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 

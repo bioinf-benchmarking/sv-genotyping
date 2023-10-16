@@ -53,11 +53,11 @@ plots:
     parameters:
       size: small
       genome_build: hg38
-      n_individuals: [5, 10, 50, 100]
+      n_individuals: [5, 25, 60, 125, 500, 2500]
       variant_type: all
       allele_frequency_snps_indels: 0.01
       allele_frequency_svs: 0
-      method: ["kage", "pangenie", "paragraph"]
+      method: ["kage", "pangenie"]
       limit_accuracy_to_variant_type: ["snps", "indels", "svs", "all"]
     type_limits:
       source: RealVariantSource
