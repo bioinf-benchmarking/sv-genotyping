@@ -14,17 +14,6 @@ rule remove_genotype_info_gz:
         "bcftools view -G {input} -O z -o {output}"
 
 
-rule kage_no_impuation_index:
-    input:
-        reference=BaseGenome.path(),
-        population_vcf=FilteredPopulation.path(),
-    output:
-        index = GenotypeResults.path(method="kage_no_imputation",file_ending="/index.npz")
-    shell:
-        """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index} --modulo 200000033 --variant-window 7 -k 31
-        """
-
 
 rule kage_index:
     input:
@@ -43,14 +32,17 @@ rule kage_index:
 
 rule run_kage_no_impuation:
     input:
-        index = GenotypeResults.path(method="kage_no_imputation", file_ending="/index.npz"),
+        index = GenotypeResults.path(method="kage", file_ending="/index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage_no_imputation")
     benchmark:
         GenotypeResults.path(method="kage_no_imputation", file_ending="/benchmark.csv")
     shell:
-        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage}"
+        "kage genotype -i {input.index} -r {input.reads} "
+        " -o {output.results} -t {wildcards.n_threads} "
+        "--average-coverage {wildcards.coverage} -k 31 "
+        "--ignore-helper-model True "
 
 
 rule run_kage:

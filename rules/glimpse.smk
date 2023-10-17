@@ -39,7 +39,7 @@ rule make_glimpse_chunks:
 
 rule run_glimpse:
     input:
-        vcf = GenotypeResults.path(method="kage"),  # kage_no_helper_model
+        vcf = GenotypeResults.path(method="kage_no_imputation"),
         ref_vcf = FilteredPopulation.path(),
         #vcf="data/{dataset}/kageNoPriorsN{n_individuals}all_{experiment}.vcf.gz",
         #ref_vcf="data/{dataset}/variants_{n_individuals}all.vcf.gz",
@@ -51,7 +51,7 @@ rule run_glimpse:
         vcf = GenotypeResults.path(method="kage_with_glimpse"),
         #vcf="data/{dataset}/kageWithGlimpseN{n_individuals,\d+}all_{experiment}.vcf.gz"
     benchmark:
-        GenotypeResults.path(method="kage_with_glimpse", file_ending="/benchmark.csv")
+        GenotypeResults.path(method="kage_with_glimpse", file_ending="/glimpse.csv")
         #"data/{dataset}/benchmarks/glimpse_{n_individuals,\d+}all_{experiment}.tsv"
     conda: "../envs/bcftools.yml"
     threads: lambda wildcards: int(wildcards.n_threads)
@@ -64,6 +64,7 @@ rule run_glimpse:
         tabix -p vcf -f {input.vcf}.gz
         rm -f {params.base_path}/GLIMPSE-*.bcf
         cat {input.chunks} | parallel -j {config[n_threads]} --line-buffer "scripts/run_glimpse.sh {{}} {input.vcf}.gz {input.ref_vcf}"
+        mkdir -p {params.base_path}
 
         # merge all result files 
         rm -rf {params.base_path}/glimpse_tmp_*.vcf.gz
@@ -71,6 +72,7 @@ rule run_glimpse:
         for chromosome in $(echo $chromosomes | tr "," "\n")
             do
             LST={params.base_path}/glimpse_list$chromosome.tmp.txt
+            ls {params.base_path}
             ls {input.vcf}.gz-GLIMPSE-$chromosome.*.bcf | python3 scripts/sort_glimpse_list.py > $LST
             {input.glimpse_command_ligate} --input $LST --output {params.base_path}/glimpse_tmp_$chromosome.vcf.gz
             tabix -p vcf -f {params.base_path}/glimpse_tmp_$chromosome.vcf.gz
