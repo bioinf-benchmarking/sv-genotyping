@@ -57,5 +57,11 @@ rule run_kage:
     threads:
         lambda wildcards: int(wildcards.n_threads)
     shell:
-        "kage genotype -i {input.index} -r {input.reads} -o {output.results} -t {wildcards.n_threads} --average-coverage {wildcards.coverage} -k 31"
+        "kage genotype -i {input.index} "
+        "-r {input.reads} "
+        "-o {output.results} "
+        "-t {wildcards.n_threads} "
+        "--average-coverage {wildcards.coverage} "
+        "-k 31 "
+        "--ignore-homo-ref True"  # don't write homo ref variants for faster writing
 

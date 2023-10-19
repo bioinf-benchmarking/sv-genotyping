@@ -170,7 +170,21 @@ plots:
     type_limits:
       source: RealVariantSource
 
-
+  hprc:
+    plot_type: f1_vs_n_individuals
+    parameters:
+      size: big
+      genome_build: chm13
+      n_individuals: [ '10', '44']
+      variant_type: all
+      allele_frequency_snps_indels: 0.001
+      allele_frequency_svs: 0
+      method: [ "kage", "pangenie" ]
+      limit_accuracy_to_variant_type: [ "svs" ]
+    type_limits:
+      source: RealVariantSource
+    layout:
+      xaxis_type: log
 
   # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables

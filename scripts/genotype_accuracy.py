@@ -6,7 +6,7 @@ import logging
 import numpy as np
 
 logging.basicConfig(level=logging.INFO)
-from kage.analysis.genotype_accuracy import GenotypeAccuracy, IndexedGenotypes, IndexedGenotypes2
+from kage.analysis.genotype_accuracy import GenotypeAccuracy, IndexedGenotypes, IndexedGenotypes2, IndexedGenotypes3
 
 """
 def parse_genotype(genotype):
@@ -127,8 +127,8 @@ else:
     print("Input is biallelic? ", input_is_biallelic)
 
     if not input_is_biallelic:
-        truth = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input[0], convert_to_biallelic=False)
-        sample = IndexedGenotypes2.from_multiallelic_vcf(snakemake.input[1], convert_to_biallelic=False)
+        truth = IndexedGenotypes3.from_multiallelic_vcf(snakemake.input[0], convert_to_biallelic=False)
+        sample = IndexedGenotypes3.from_multiallelic_vcf(snakemake.input[1], convert_to_biallelic=False)
         sample.normalize_against_reference_variants(truth)
     else:
         truth = IndexedGenotypes2.from_biallelic_vcf(snakemake.input[0])
