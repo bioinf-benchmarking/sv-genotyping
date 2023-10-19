@@ -36,7 +36,9 @@ rule make_glimpse_chunks:
         cat {params.base_path}/glimpse_chunk.*.txt > {output}
         """
 
-
+# Messy rule to run all of glimpse in one rule parallelized
+# can probably be split into several rules and use snakemake
+# idea here is to use parallel on the chunks that glimpse create
 rule run_glimpse:
     input:
         vcf = GenotypeResults.path(method="kage_no_imputation"),

@@ -20,9 +20,9 @@ rule kage_index:
         reference = BaseGenome.path(),
         population_vcf = FilteredPopulation.path(),
     output:
-       index = GenotypeResults.path(method="kage", file_ending="/index.npz")
+       index = FilteredPopulation.path(file_ending="/kage_index.npz")
     threads:
-        lambda wildcards: int(wildcards.n_threads)
+        lambda wildcards: 8
     shell:
         """
         kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  \
@@ -32,7 +32,7 @@ rule kage_index:
 
 rule run_kage_no_impuation:
     input:
-        index = GenotypeResults.path(method="kage", file_ending="/index.npz"),
+        index = FilteredPopulation.path(file_ending="/kage_index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage_no_imputation")
@@ -47,7 +47,7 @@ rule run_kage_no_impuation:
 
 rule run_kage:
     input:
-        index = GenotypeResults.path(method="kage", file_ending="/index.npz"),
+        index = FilteredPopulation.path(file_ending="/kage_index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage"),

@@ -52,3 +52,24 @@ rule convert_cram_to_fq:
     shell:
         "samtools fastq --threads 8 --reference {input.reference} {input.reads} | gzip -c > {output}"
 
+
+
+def compute_n_reads(wildcards):
+    # We are always dealing with real human reads with length 150
+    genome_size = 3000000000
+    coverage = float(wildcards.coverage)
+    return int(genome_size * coverage / 150)
+
+
+rule downsample_real_reads:
+    input:
+        RealRawReads.path(file_ending="/real_reads.fq.gz")
+    output:
+        Reads.path(read_source="real", file_ending="/reads.fq.gz")
+    params:
+        n_reads = compute_n_reads
+    conda:
+        "../envs/seqtk.yml"
+    shell:
+        "seqtk sample -2 -s{config[random_seed]} {input} {params.n_reads} | gzip -c > {output}"
+

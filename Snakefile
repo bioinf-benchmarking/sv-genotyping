@@ -104,6 +104,7 @@ class FilteredPopulation:
 class Reads:
     # Reads are implicitly simulated from the individual that is removed from the population
     individual: Individual
+    read_source: Literal["simulated", "real"] = "simulated"
     read_length: int = 150
     coverage: float = 10.0
     snp_error_rate: float = 0.001
@@ -120,6 +121,7 @@ class RealRawReads:
 # Necessay to group reads and population so that GenotypeResults have one dependency
 class ReadsAndFilteredPopulation:
     population: FilteredPopulation  # FilteredPopulation has reference to Individual
+    read_source: Literal["simulated", "real"] = "simulated"
     read_length: int = 150
     coverage: float = 10.0
     snp_error_rate: float = 0.001
@@ -187,6 +189,7 @@ include: "rules/glimpse.smk"
 
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
+#include: "/home/ivar/dev/mapping-benchmarking/rules/plotting.smk"
 
 
 
@@ -195,5 +198,4 @@ include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk"
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/mason.smk", branch="master")
 #include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
 #include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
-#include: "/home/ivar/dev/mapping-benchmarking/rules/plotting.smk"
 

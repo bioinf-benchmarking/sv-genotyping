@@ -6,7 +6,7 @@ rule simulate_reads2:
         index=BaseGenome.path(file_ending="/reference.fa.fai"),
         individual=Individual.path(),
     output:
-        Reads.path(file_ending="/reads.fq.gz")
+        Reads.path(read_source="simulated", file_ending="/reads.fq.gz")
     threads:
         4
     shell:
