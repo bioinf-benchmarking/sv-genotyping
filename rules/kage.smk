@@ -19,13 +19,14 @@ rule kage_index:
     input:
         reference = BaseGenome.path(),
         population_vcf = FilteredPopulation.path(),
+        population_vcf_no_genotypes = FilteredPopulation.path(file_ending="/filtered_population_no_genotypes.vcf.gz"),
     output:
        index = FilteredPopulation.path(file_ending="/kage_index.npz")
     threads:
         lambda wildcards: 8
     shell:
         """
-        kage index -r {input.reference} -v {input.population_vcf} -o {output.index}  \
+        kage index -r {input.reference} -v {input.population_vcf} -V {input.population_vcf_no_genotypes} -o {output.index}  \
         --make-helper-model True --modulo 200000033 --variant-window 5 -k 31
         """
 

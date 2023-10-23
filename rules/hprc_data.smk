@@ -15,7 +15,7 @@ rule downlad_raw_hprc_variants:
     output:
         protected(RawHPRCVariants.path())
     shell:
-        "cp local_data/hprc.vcf.gz {output}"
+        "cp local_data/hprc_biallelic.vcf.gz {output}"
         #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
         #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
 

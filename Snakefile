@@ -83,6 +83,25 @@ class Individual:
 
 
 @parameters
+class StratifiedIndividual:
+    """
+    An individual where variants are filtered on a stratification
+    """
+    individual: Individual
+    stratification_variant_type: Literal["snps", "indels", "snps_indels", "svs", "all"] = "snps_indels"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+    file_ending = "/individual.vcf"
+
+
+@parameters
+class FilteredIndividual:
+    """Additional filter on a Stratified individual"""
+    individual: StratifiedIndividual
+    individual_filter: Literal["none", "only_variants_in_population"] = "none"
+    file_ending = "/individual.vcf"
+
+
+@parameters
 class AlleleFrequencyFilteredPopulation:
     population: PopulationWithoutIndividual
     allele_frequency_svs: float = 0.1
@@ -137,36 +156,59 @@ class GenotypeResults:
 
 
 @parameters
-class GenotypeDebug:
+class StratifiedGenotypeResults:
     genotype_results: GenotypeResults
+    stratification_variant_type: Literal["snps", "indels", "snps_indels", "svs", "all"] = "snps_indels"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+
+    individual_filter: Literal["none", "only_variants_in_population"] = "none"
+    file_ending = "/genotypes.vcf"
+
+
+@parameters
+class GenotypeDebug:
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
     file_ending = "/debug.txt"
 
 
 @result
 class GenotypeReport:
-    genotype_results: GenotypeResults
+    genotype_results: StratifiedGenotypeResults
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
+@result
+class VcfEvalReport:
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeRecall:
-    genotype_results: GenotypeResults
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeOneMinusPrecision:
-    genotype_results: GenotypeResults
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeF1Score:
-    genotype_results: GenotypeResults
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
 
 @result
 class GenotypeRuntime:
-    genotype_results: GenotypeResults
+    genotype_results: StratifiedGenotypeResults
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
+
+
+@parameters
+class GenomeStratification:
+    genome_build: GenomeBuild
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+    file_ending = ".bed"
 
 
 
