@@ -11,11 +11,27 @@ class RawHPRCVariants:
     file_ending = "/variants.vcf.gz"
 
 
+"""
+Tmp rules to use local data instead of download.
+Should be changed to download from zenodo
+"""
 rule downlad_raw_hprc_variants:
     output:
-        protected(RawHPRCVariants.path())
+        protected(RawHPRCVariants.path(file_ending="/hprc_biallelic_chm13.vcf.gz"))
     shell:
-        "cp local_data/hprc_biallelic.vcf.gz {output}"
+        "cp local_data/hprc_biallelic_chm13.vcf.gz {output}"
+        #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
+        #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
+
+
+rule downlad_raw_hprc_variants_hg38:
+    output:
+        protected(RawHPRCVariants.path(file_ending="/hprc_biallelic_hg38.vcf.gz"))
+    conda:
+        "../envs/bcftools.yml"
+    shell:
+        "zcat local_data/cactus_filtered_ids_biallelic.vcf.gz "
+        " | sed 's/chr//g' | bgzip -c > {output}  "
         #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
         #"wget -O {output} https://zenodo.org/record/7669083/files/cactus_filtered_ids_chm13.vcf.gz?download=1"
 
@@ -23,8 +39,8 @@ rule downlad_raw_hprc_variants:
 #hprc needs no filtering
 rule get_hprc_variants:
     input:
-        vcf = RawHPRCVariants.path(),
-        index = RawHPRCVariants.path(file_ending="/variants.vcf.gz.tbi")
+        vcf = RawHPRCVariants.path(file_ending="/hprc_biallelic_{genome_build}.vcf.gz"),
+        index = RawHPRCVariants.path(file_ending="/hprc_biallelic_{genome_build}.vcf.gz.tbi")
     output:
         RealVariantSource.path(database_name="hprc", variant_type="all", file_ending="/unfiltered_population.vcf.gz")
     params:

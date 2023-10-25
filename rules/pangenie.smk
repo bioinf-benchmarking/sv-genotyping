@@ -106,4 +106,41 @@ rule convert_pangenie_genotypes_back_to_biallelic:
         """
 
 
+# PanGenie version 1.0.0
+rule run_pangenie1:
+    input:
+        reference = BaseGenome.path(),
+        population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
+        reads = Reads.path(file_ending="/reads.fq")
+    output:
+        results = GenotypeResults.path(method="pangenie_v1.0.0", file_ending="/genotypes_multiallelic.vcf")
+    params:
+        jellyfish_memory = lambda wildcards: 3000000000 if wildcards.size == "big" else 300000000
+    threads:
+        lambda wildcards: int(wildcards.n_threads)
+    benchmark:
+        GenotypeResults.path(method="pangenie_v1.0.0", file_ending="/benchmark.csv")
+    shell:
+        """
+         ~/dev/pangenie-v1.0.0/pangenie-1.0.0/build/src/PanGenie -i {input.reads} \
+         -v {input.population_vcf} \
+         -r {input.reference} \
+         -e {params.jellyfish_memory} \
+         -o {output.results} \
+         -t {wildcards.n_threads} \
+         -j {wildcards.n_threads} \
+         && mv {output.results}_genotyping.vcf {output.results}
+         """
+
+
+rule convert_pangenie_genotypes_back_to_biallelic_v1:
+    input:
+        callset_vcf=FilteredPopulation.path(file_ending="/filtered_population.with_ids.vcf"),
+        vcf = GenotypeResults.path(method="pangenie_v1.0.0",file_ending="/genotypes_multiallelic.vcf")
+    output:
+        vcf = GenotypeResults.path(method="pangenie_v1.0.0",file_ending="/genotypes.vcf")
+    shell:
+        """
+        cat {input.vcf} | python scripts/pangenie_convert_to_biallelic.py {input.callset_vcf} > {output.vcf}
+        """
 

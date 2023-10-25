@@ -30,7 +30,9 @@ rule remove_individual_from_population:
         "../envs/bcftools.yml"
     shell:
         #"bcftools view --samples ^{wildcards.individual_id} -o {output.population} {input.population}"
-        "bcftools view --samples-file ^{input.sample_name} {input.population} | bcftools view --min-ac 1 -O z -o {output.population}"
+        "bcftools view --samples-file ^{input.sample_name} {input.population} | bcftools view --min-ac 1 |"
+        # add AF tag
+        "bcftools +fill-tags -O z -o {output.population}  -- -t AF"
 
 
 rule extract_individual_from_population:

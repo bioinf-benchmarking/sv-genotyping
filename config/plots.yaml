@@ -14,6 +14,7 @@ default_parameter_sets:
   snp_rate: 0.01
   small_indel_rate: 0.01
   sv_indel_rate: 0.005
+  ratio_of_best_genotypes: [0.05, 0.25, 0.5, 0.75, 1.0]
 
 
 # Axis/titles/etc that will be replaced in plots
@@ -53,12 +54,12 @@ plots:
     parameters:
       size: small
       genome_build: hg38
-      n_individuals: ['5', '25', '60']  #, '125', '500', '2500']
+      n_individuals: ['5', '25', '60', '125', '500', '2500']
       variant_type: all
       allele_frequency_snps_indels: 0.01
       allele_frequency_svs: 0
       method: ["kage", "pangenie"]  #, "kage_with_glimpse"]
-      stratification_variant_type: ["snps", "indels", "svs", "all"]
+      stratification_variant_type: ["svs", "snps", "indels"]  # ["snps", "indels", "svs", "all"]
       individual_id: 1
     type_limits:
       source: RealVariantSource
@@ -68,12 +69,13 @@ plots:
     parameters:
       size: medium6
       genome_build: hg38
-      n_individuals: [ '5', '25', '50', '100', '125', '500', '1000', '2500']
+      n_individuals: [ '5', '25', '60', '125', '500', '2500']
       variant_type: all
       allele_frequency_snps_indels: 0.01
       allele_frequency_svs: 0
-      method: [ "kage", "pangenie", "kage_with_glimpse" ]
-      stratification_variant_type: [ "snps", "indels", "svs", "all" ]
+      method: [ "kage", "pangenie" ]
+      stratification_variant_type: ["svs", "large_indels"]   # [ "snps", "indels", "svs", "all" ]
+      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
     type_limits:
       source: RealVariantSource
     layout:
@@ -190,6 +192,25 @@ plots:
     layout:
       xaxis_type: log
 
+  roc_test:
+    plot_type: roc
+    parameters:
+        size: small
+        genome_build: chm13
+        database_name: "hprc"
+        n_individuals: 50
+        individual_id: 24
+        allele_frequency_snps_indels: 0.01
+        allele_frequency_svs: 0
+        method: ["kage", "pangenie"]
+        coverage: 30
+        variant_type: "all"
+        stratification_variant_type: ["svs", "indels"]
+        ratio_of_best_genotypes: [0.05, 0.1, 0.25, 0.5, 0.75, 1.0]
+        n_threads: 16
+    type_limits:
+        source: RealVariantSource
+
   # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
 # Each of x_axis, y_axis, category_variable, color, labels, facet_col, facet_row
@@ -210,7 +231,8 @@ plot_types:
     x: n_individuals
     y: GenotypeF1Score
     color: method
-    facet_row: stratification_variant_type
+    facet_row: stratification_type
+    facet_col: stratification_variant_type
 
   sv_accuracy_vs_snp_rate:
     type: line
@@ -240,3 +262,12 @@ plot_types:
     color: method
     #markers: True
     #labels: GenotypeF1Score
+
+  roc:
+    type: line
+    x: GenotypeRecall
+    y: GenotypeOneMinusPrecision
+    color: method
+    text: ratio_of_best_genotypes
+    facet_row: stratification_variant_type
+

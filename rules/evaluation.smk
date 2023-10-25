@@ -19,7 +19,7 @@ def genotype_accuracy_input(wildcards):
     else:
         out = [
             FilteredIndividual.path(file_ending="/individual.vcf"),
-            StratifiedGenotypeResults.path()
+            BestGenotypes.path()
         ]
         print(out)
         return out
@@ -34,13 +34,13 @@ rule genotype_accuracy:
     output:
         recall = GenotypeRecall.path(),
         one_minus_precision = GenotypeOneMinusPrecision.path(),
-        #f1 = GenotypeF1Score.path(),
+        f1 = GenotypeF1Score.path(),
         report = GenotypeReport.path()
     script:
         "../scripts/genotype_accuracy.py"
 
+"""
 rule f1_score:
-    """ Using rtg tools"""
     input:
         rtg_report = VcfEvalReport.path()
     output:
@@ -51,6 +51,7 @@ rule f1_score:
             f1_score = float(line.split()[-1])
             with open(output.f1, "w") as f:
                 f.write(str(f1_score))
+"""
 
 """
 rule genotype_accuracy_multiallelic:
@@ -106,9 +107,10 @@ rule download_genome_stratification:
     output:
         GenomeStratification.path()
     params:
-        file = get_stratification_file
+        file = get_stratification_file,
+        remove_chr_prefix= lambda wildcards,input,output: " && sed -i 's/chr//g' " + output[0] if config["genomes"][wildcards.genome_build]["remove_chr_prefix"] else ""
     shell:
-        "wget -O - {params.file} | gunzip -c > {output}"
+        "wget -O - {params.file} | gunzip -c > {output} {params.remove_chr_prefix}"
 
 
 
@@ -117,12 +119,14 @@ rule subset_genotypes_on_stratification:
         vcf = GenotypeResults.path(),
         stratification=GenomeStratification.path()
     output:
-        vcf = StratifiedGenotypeResults.path()
+        vcf = StratifiedGenotypeResults.path(file_ending="/genotypes.vcf"),
+        gz = StratifiedGenotypeResults.path(file_ending="/genotypes.vcf.gz")
     conda:
         "../envs/bedtools.yml"
     shell:
         "bedtools intersect -header -wa -u -a {input.vcf} -b {input.stratification} "
-        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} "
+        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} &&"
+        "bgzip -c {output.vcf} > {output.gz} "
 
 
 # "all" is simply the vcf copied
@@ -130,12 +134,29 @@ rule all_stratification:
     input:
         vcf = GenotypeResults.path(),
     output:
-        vcf = StratifiedGenotypeResults.path(stratification_type="all")
+        vcf = StratifiedGenotypeResults.path(stratification_type="all"),
+        gz = StratifiedGenotypeResults.path(stratification_type="all", file_ending="/genotypes.vcf.gz")
     shell:
-        "cat {input.vcf} | python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} "
+        "cat {input.vcf} | "
+        "python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} && "
+        "bgzip -c {output.vcf} > {output.gz}"
 
 
 ruleorder: all_stratification > subset_genotypes_on_stratification
+
+
+rule get_best_genotypes:
+    input:
+        vcf = StratifiedGenotypeResults.path(),
+    output:
+        vcf = BestGenotypes.path(),
+        gz = BestGenotypes.path(file_ending="/genotypes.vcf.gz")
+    shell:
+        """
+        python3 scripts/get_best_genotypes.py {input.vcf} {wildcards.ratio_of_best_genotypes} > {output.vcf} &&
+        bgzip -c {output.vcf} > {output.gz}
+        """
+
 
 
 rule subset_individual_on_stratification:
@@ -143,12 +164,14 @@ rule subset_individual_on_stratification:
         vcf = Individual.path(),
         stratification=GenomeStratification.path()
     output:
-        vcf = StratifiedIndividual.path()
+        vcf = StratifiedIndividual.path(),
+        gz = StratifiedIndividual.path(file_ending="/individual.vcf.gz"),
     conda:
         "../envs/bedtools.yml"
     shell:
         "bedtools intersect -header -wa -u -a {input.vcf} -b {input.stratification} "
-        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} "
+        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} && "
+        "bgzip -c {output.vcf} > {output.gz}"
 
 
 # "all" is simply the vcf copied
@@ -156,10 +179,13 @@ rule all_stratification_individual:
     input:
         vcf = Individual.path(),
     output:
-        vcf = StratifiedIndividual.path(stratification_type="all")
+        vcf = StratifiedIndividual.path(stratification_type="all"),
+        gz = StratifiedIndividual.path(stratification_type="all", file_ending="/individual.vcf.gz"),
     shell:
         "cat {input.vcf} "
-        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} "
+        "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} && "
+        "bgzip -c {output.vcf} > {output.gz}"
+
 
 
 ruleorder: all_stratification_individual > subset_individual_on_stratification
@@ -173,8 +199,10 @@ rule filter_individual:
     input:
         individual = StratifiedIndividual.path(),
         population = PopulationWithoutIndividual.path(),
+        population_index = PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi")
     output:
-        individual = FilteredIndividual.path(individual_filter="only_variants_in_population")
+        individual = FilteredIndividual.path(individual_filter="only_variants_in_population"),
+        gz = FilteredIndividual.path(individual_filter="only_variants_in_population", file_ending="/individual.vcf.gz"),
     params:
         dir = lambda wildcards, input, output: "/".join(output.individual.split("/")[:-1])
     conda:
@@ -184,7 +212,8 @@ rule filter_individual:
         bgzip -c {input.individual} > {input.individual}.gz &&
         tabix -p vcf {input.individual}.gz &&
         bcftools isec -p {params.dir} {input.individual}.gz {input.population} -O z && 
-        zcat {params.dir}/0002.vcf.gz > {output.individual}
+        zcat {params.dir}/0002.vcf.gz > {output.individual} &&
+        bgzip -c {output.individual} > {output.gz}
         """
 
 
@@ -192,9 +221,10 @@ rule filter_individual_no_filter:
     input:
         individual = StratifiedIndividual.path(),
     output:
-        individual = FilteredIndividual.path(individual_filter="none")
+        individual = FilteredIndividual.path(individual_filter="none"),
+        gz = FilteredIndividual.path(individual_filter="none", file_ending="/individual.vcf.gz"),
     shell:
-        "cp {input.individual} {output.individual}"
+        "cp {input.individual} {output.individual} && bgzip -c {output.individual} > {output.gz}"
 
 
 
@@ -209,17 +239,21 @@ rule rtg_format:
         out_path = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
     shell:
         """
+        rm -rf {params.out_path} && 
         rtg format -o {params.out_path} {input}
         """
 
 
 rule rtg_tools_vcf_eval:
     input:
-        genotypes=FilteredIndividual.path(file_ending="/individual.vcf"),
-        truth=StratifiedGenotypeResults.path(),
+        truth=FilteredIndividual.path(file_ending="/individual.vcf.gz"),
+        truth_index=FilteredIndividual.path(file_ending="/individual.vcf.gz.tbi"),
+        genotypes=StratifiedGenotypeResults.path(file_ending="/genotypes.vcf.gz"),
+        genotypes_index=StratifiedGenotypeResults.path(file_ending="/genotypes.vcf.gz.tbi"),
         sdf=BaseGenome.path(file_ending="/sdf/done")
     output:
-        report = VcfEvalReport.path()
+        report = VcfEvalReport.path(),
+        roc = VcfEvalRoc.path()
     params:
         out_dir = lambda wildcards, input, output: "/".join(output.report.split("/")[:-1]) + "/rtg_tools_tmp",
         sdf = lambda wildcards, input, output: input.sdf.replace("/done", "")
@@ -227,12 +261,67 @@ rule rtg_tools_vcf_eval:
         "../envs/rtg_tools.yml"
     shell:
         """
-        bgzip -c {input.genotypes} > {input.genotypes}.gz &&
-        tabix -p vcf {input.genotypes}.gz &&
-        bgzip -c {input.truth} > {input.truth}.gz &&
-        tabix -p vcf {input.truth}.gz &&
         rm -rf {params.out_dir} &&
         
-        rtg vcfeval -b {input.truth}.gz -c {input.genotypes}.gz -t {params.sdf} -o {params.out_dir} --no-roc &&
-        mv {params.out_dir}/summary.txt {output.report}
+        rtg vcfeval -b {input.truth} -c {input.genotypes} -t {params.sdf} -o {params.out_dir} &&
+        mv {params.out_dir}/summary.txt {output.report} &&
+        #rtg rocplot {params.out_dir}/weighted_roc.tsv.gz --png {output.roc} && gio open {output.roc}
+        rtg rocplot {params.out_dir}/weighted_roc.tsv.gz 
         """
+
+
+rule happy_evaluation:
+    input:
+        truth=FilteredIndividual.path(file_ending="/individual.vcf.gz"),
+        truth_index=FilteredIndividual.path(file_ending="/individual.vcf.gz.tbi"),
+        genotypes=BestGenotypes.path(file_ending="/genotypes.vcf.gz"),
+        genotypes_index=StratifiedGenotypeResults.path(file_ending="/genotypes.vcf.gz.tbi"),
+        reference=BaseGenome.path()
+    output:
+        roc=VcfEvalRoc.path(file_ending="/happy/happy.roc.all.csv.gz")
+    params:
+        out_dir = lambda wildcards,input,output: "/".join(output.roc.split("/")[:-1]),
+    conda:
+        "../envs/happy.yml"
+    shell:
+        """
+        mkdir -p {params.out_dir} &&
+        echo {params.out_dir} && 
+        hap.py {input.truth} {input.genotypes} -o {params.out_dir}/happy -r {input.reference} --roc GQ
+        """
+
+
+rule roc_plot:
+    input:
+        roc=VcfEvalRoc.path(file_ending="/happy/happy.roc.all.csv.gz")
+    output:
+        png=VcfEvalRoc.path(file_ending="/happy_roc.png")
+    run:
+        import gzip
+        import pandas as pd
+        import plotly.express as px
+        import numpy as np
+
+        with gzip.open(input[0], "rt") as f:
+            f.readline()
+            lines = f.readlines()
+            lines = (l.split(",") for l in lines)
+            lines = [line for line in lines if line[0] == "INDEL" and line[3] == "ALL" and line[6] != "*"]
+
+            quality_scores = np.array([float(line[6]) for line in lines])
+            recalls = np.array([float(line[7]) for line in lines])
+            precisions = np.array([float(line[8]) for line in lines])
+
+            sorting = np.argsort(-quality_scores)
+            quality_scores = quality_scores[sorting]
+            recalls = recalls[sorting]
+            precisions = precisions[sorting]
+
+            df = pd.DataFrame({"quality_score": quality_scores, "recall": recalls, "precision": precisions})
+            print(df)
+            fig = px.line(df, x="recall", y="precision", text="quality_score")
+
+            # save plotly figure
+            fig.write_image(output.png)
+
+            #px.show()

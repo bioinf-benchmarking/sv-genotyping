@@ -6,12 +6,15 @@ rule remove_genotype_info:
 
 
 rule remove_genotype_info_gz:
-    input: "{sample}.vcf.gz"
-    output: "{sample}_no_genotypes.vcf.gz"
+    input:
+        vcf="{sample}.vcf.gz",
+        index="{sample}.vcf.gz.tbi"
+    output:
+        "{sample}_no_genotypes.vcf.gz"
     conda:
         "../envs/bcftools.yml"
     shell:
-        "bcftools view -G {input} -O z -o {output}"
+        "bcftools view -G {input.vcf} -O z -o {output}"
 
 
 
