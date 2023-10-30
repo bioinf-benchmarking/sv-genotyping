@@ -211,6 +211,27 @@ plots:
     type_limits:
         source: RealVariantSource
 
+  hprc_plot:
+    plot_type: hprc_plot
+    parameters:
+      size: big
+      genome_build: hg38
+      database_name: "hprc"
+      n_individuals: 44
+      individual_id: ["24"]
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: pangenie
+      coverage: 30
+      variant_type: all
+      stratification_variant_type: [sv_deletions, sv_insertions, svs_other]
+      stratification_type: [easy, repeats, low-mappability, other-difficult]
+      ratio_of_best_genotypes: 1.0
+      n_threads: 24
+      individual_filter: [none, only_variants_in_population]
+    type_limits:
+      source: RealVariantSource
+
   # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
 # Each of x_axis, y_axis, category_variable, color, labels, facet_col, facet_row
@@ -271,3 +292,12 @@ plot_types:
     text: ratio_of_best_genotypes
     facet_row: stratification_variant_type
 
+
+  hprc_plot:
+    # Reproducing pangenie-plot in hprc paper
+    type: scatter
+    x: individual_id
+    y: WeightedGenotypeConcordance
+    facet_col: stratification_variant_type
+    color: stratification_type
+    facet_row: individual_filter

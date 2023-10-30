@@ -35,6 +35,7 @@ rule genotype_accuracy:
         recall = GenotypeRecall.path(),
         one_minus_precision = GenotypeOneMinusPrecision.path(),
         f1 = GenotypeF1Score.path(),
+        weighted_genotype_concordance = WeightedGenotypeConcordance.path(),
         report = GenotypeReport.path()
     script:
         "../scripts/genotype_accuracy.py"
@@ -124,7 +125,7 @@ rule subset_genotypes_on_stratification:
     conda:
         "../envs/bedtools.yml"
     shell:
-        "bedtools intersect -header -wa -u -a {input.vcf} -b {input.stratification} "
+        "bedtools intersect -header -wa -f 0.5 -u -a {input.vcf} -b {input.stratification} "
         "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} &&"
         "bgzip -c {output.vcf} > {output.gz} "
 
@@ -169,7 +170,7 @@ rule subset_individual_on_stratification:
     conda:
         "../envs/bedtools.yml"
     shell:
-        "bedtools intersect -header -wa -u -a {input.vcf} -b {input.stratification} "
+        "bedtools intersect -header -wa -f 0.5 -u -a {input.vcf} -b {input.stratification} "
         "| python3 scripts/filter_vcf_on_variant_type.py {wildcards.stratification_variant_type} > {output.vcf} && "
         "bgzip -c {output.vcf} > {output.gz}"
 
@@ -193,16 +194,13 @@ ruleorder: all_stratification_individual > subset_individual_on_stratification
 
 
 rule filter_individual:
-    """
-    Can filter an individual so that it only keeps variants that are in the population
-    """
     input:
         individual = StratifiedIndividual.path(),
         population = PopulationWithoutIndividual.path(),
         population_index = PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi")
     output:
-        individual = FilteredIndividual.path(individual_filter="only_variants_in_population"),
-        gz = FilteredIndividual.path(individual_filter="only_variants_in_population", file_ending="/individual.vcf.gz"),
+        individual = FilteredIndividual.path(individual_filter="only_variants_in_population_isec"),
+        gz = FilteredIndividual.path(individual_filter="only_variants_in_population_isec", file_ending="/individual.vcf.gz"),
     params:
         dir = lambda wildcards, input, output: "/".join(output.individual.split("/")[:-1])
     conda:
@@ -215,6 +213,25 @@ rule filter_individual:
         zcat {params.dir}/0002.vcf.gz > {output.individual} &&
         bgzip -c {output.individual} > {output.gz}
         """
+
+
+rule filter_individual2:
+    """
+    Filter an individual so that it only keeps variants that are in the population
+    """
+    input:
+        individual = StratifiedIndividual.path(),
+        population = PopulationWithoutIndividual.path(),
+    output:
+        individual = FilteredIndividual.path(individual_filter="only_variants_in_population"),
+        gz = FilteredIndividual.path(individual_filter="only_variants_in_population", file_ending="/individual.vcf.gz"),
+        variant_ids = FilteredIndividual.path(individual_filter="only_variants_in_population", file_ending="/untypable_ids.tsv")
+    shell:
+        """
+        python3 scripts/filter_vcf_not_in_other_vcf.py {input.population} {input.individual} {output.variant_ids} > {output.individual} &&
+        bgzip -c {output.individual} > {output.gz}
+        """
+
 
 
 rule filter_individual_no_filter:
@@ -325,3 +342,35 @@ rule roc_plot:
             fig.write_image(output.png)
 
             #px.show()
+
+
+rule pangenie_ids:
+    """
+    Get the ids.tsv file neede for running pangenie's evaluation script
+    """
+    input:
+        vcf=FilteredIndividual.path(file_ending="/individual.vcf"),
+        #untypable_ids="empty.tsv"  # don't need untypable, variants already filtered
+    output:
+        ids = FilteredIndividual.path(file_ending="/ids.tsv")
+    shell:
+        """
+        #cat {input.vcf} | python3 scripts/pangenie_skip_untypeable.py {input} | 
+        cat {input.vcf} | python3 scripts/pangenie_get_ids.py > {output}
+        """
+
+
+rule pangenie_genotype_accuracy:
+    """
+    Using pangenie's script
+    """
+    input:
+        ids=FilteredIndividual.path(file_ending="/ids.tsv"),
+        truth=FilteredIndividual.path(file_ending="/individual.vcf"),
+        sample=BestGenotypes.path(file_ending="/genotypes.vcf"),
+    output:
+        report=touch(PangenieReport.path())
+    shell:
+        """
+		python3 scripts/pangenie_genotype_evaluation.py {input.truth} {input.sample} {input.ids} --qual 0
+        """

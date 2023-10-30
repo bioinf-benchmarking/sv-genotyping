@@ -9,7 +9,6 @@ samples = []
 stats = []
 
 outfiles = []
-chromosomes = ['chr' + str(i) for i in range(1,23)] + ['chrX']
 
 numbers_varianttypes = defaultdict(int)
 numbers_sample = defaultdict(int)
@@ -24,21 +23,30 @@ for line in sys.stdin:
 		stats = [0] * len(samples)
 		outfiles = [open(output + '/' + sample + '-untypable.tsv', 'w') for sample in samples]
 		continue
-	if fields[0] not in chromosomes:
-		continue
 	present = []
-	var_id = fields[2]
+	info_fields = { i.split('=')[0] : i.split('=')[1].strip() for i in fields[7].split(';') if '=' in i}
+	assert 'ID' in info_fields
+	var_ids = info_fields['ID'].split(',')
+	assert len(var_ids) == 1
+	var_id = var_ids[0]
 	var_type = determine_variant_type(line)
 	assert var_id != '.'
 	numbers_varianttypes[var_type] += 1
 	for sample, genotype in zip(samples, fields[9:]):
 		alleles = genotype.replace('|', '/').split('/')
-		assert len(alleles) == 2
-		assert alleles[0] in ['.', '0', '1']
-		assert alleles[1] in ['.', '0', '1']
-		if alleles[0] == "1" or alleles[1] == "1":
-			present.append(sample)
-			total_sample[(sample,var_type)] += 1
+		if len(alleles) == 2:
+			assert alleles[0] in ['.', '0', '1']
+			assert alleles[1] in ['.', '0', '1']
+			if alleles[0] == "1" or alleles[1] == "1":
+				present.append(sample)
+				total_sample[(sample,var_type)] += 1
+		elif len(alleles) == 1:
+			assert alleles[0] in ['.', '0', '1']
+			if alleles[0] == "1":
+				present.append(sample)
+				total_sample[(sample, var_type)] += 1
+		else:
+			assert(False)
 	assert len(present) > 0
 	if len(present) == 1:
 		numbers_sample[(present[0], var_type)] += 1
@@ -64,4 +72,3 @@ for variant in variants:
 		values.append(str(numbers_sample[(sample, variant)]))
 	values.append(str(numbers_varianttypes[variant]))
 	print('\t'.join(values))
-

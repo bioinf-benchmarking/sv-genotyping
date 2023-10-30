@@ -52,6 +52,9 @@ with open(snakemake.output.one_minus_precision, 'w') as f:
 with open(snakemake.output.f1, 'w') as f:
     f.write(str(f1_score))
 
+with open(snakemake.output.weighted_genotype_concordance, "w") as f:
+    f.write(str(weighted_genotype_concordance))
+
 with open(snakemake.output.report, 'wb') as f:
     pickle.dump(out_report, f)
 

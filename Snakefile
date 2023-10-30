@@ -88,7 +88,7 @@ class StratifiedIndividual:
     An individual where variants are filtered on a stratification
     """
     individual: Individual
-    stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "all"] = "snps_indels"
+    stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
     stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
     file_ending = "/individual.vcf"
 
@@ -97,7 +97,7 @@ class StratifiedIndividual:
 class FilteredIndividual:
     """Additional filter on a Stratified individual"""
     individual: StratifiedIndividual
-    individual_filter: Literal["none", "only_variants_in_population"] = "none"
+    individual_filter: Literal["none", "only_variants_in_population", "only_variants_in_population_isec"] = "none"
     file_ending = "/individual.vcf"
 
 
@@ -158,9 +158,9 @@ class GenotypeResults:
 @parameters
 class StratifiedGenotypeResults:
     genotype_results: GenotypeResults
-    stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "all"] = "snps_indels"
+    stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
     stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
-    individual_filter: Literal["none", "only_variants_in_population"] = "none"
+    individual_filter: Literal["none", "only_variants_in_population", "only_variants_in_population_isec"] = "none"
     file_ending = "/genotypes.vcf"
 
 
@@ -182,6 +182,12 @@ class GenotypeDebug:
 class GenotypeReport:
     genotype_results: BestGenotypes
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
+@parameters
+class PangenieReport:
+    genotype_results: BestGenotypes
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+    file_ending="/report.txt"
 
 @result
 class VcfEvalReport:
@@ -210,6 +216,13 @@ class GenotypeOneMinusPrecision:
 class GenotypeF1Score:
     genotype_results: BestGenotypes
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
+
+@result
+class WeightedGenotypeConcordance:
+    genotype_results: BestGenotypes
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+
 
 @result
 class GenotypeRuntime:
