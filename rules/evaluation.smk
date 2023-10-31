@@ -109,9 +109,10 @@ rule download_genome_stratification:
         GenomeStratification.path()
     params:
         file = get_stratification_file,
-        remove_chr_prefix= lambda wildcards,input,output: " && sed -i 's/chr//g' " + output[0] if config["genomes"][wildcards.genome_build]["remove_chr_prefix"] else ""
+        remove_chr_prefix= lambda wildcards,input,output: " && sed -i 's/chr//g' " + output[0] if config["genomes"][wildcards.genome_build]["remove_chr_prefix"] else "",
+        gunzip = lambda wildcards: " | gunzip -c" if get_stratification_file(wildcards).endswith(".gz") else ""
     shell:
-        "wget -O - {params.file} | gunzip -c > {output} {params.remove_chr_prefix}"
+        "wget -O - {params.file} {params.gunzip} > {output} {params.remove_chr_prefix}"
 
 
 
@@ -374,3 +375,61 @@ rule pangenie_genotype_accuracy:
         """
 		python3 scripts/pangenie_genotype_evaluation.py {input.truth} {input.sample} {input.ids} --qual 0
         """
+
+
+
+
+rule run_truvari:
+    input:
+        truth = FilteredIndividual.path(file_ending="/individual.vcf.gz"),
+        truth_index = FilteredIndividual.path(file_ending="/individual.vcf.gz.tbi"),
+        sample = BestGenotypes.path(file_ending="/genotypes.vcf.gz"),
+        sample_index = BestGenotypes.path(file_ending="/genotypes.vcf.gz.tbi"),
+        regions = GenomeStratification.path(),
+        ref = BaseGenome.path()
+    output:
+        report = TruvariReport.path()
+    params:
+        out_dir = lambda wildcards, input, output: "/".join(output.report.split("/")[:-1])
+    conda:
+        "../envs/truvari.yml"
+    shell:
+        """
+        rm -rf {params.out_dir} && 
+        truvari bench \
+        -b {input.truth} \
+        -c {input.sample} \
+        -o {params.out_dir} \
+        --refdist 500 \
+        --chunksize 500 \
+        --reference {input.ref} \
+        --includebed {input.regions} \
+        --no-ref a && 
+        mv {params.out_dir}/summary.json {output.report}
+        """
+
+
+rule process_truvari_report:
+    input:
+        report= TruvariReport.path()
+    output:
+        f1 = TruvariF1Score.path(),
+        recall = TruvariRecall.path(),
+        precision = TruvariPrecision.path(),
+    run:
+        import json
+        with open(input.report) as f:
+            report = json.load(f)
+            f1_score = report["f1"]
+            precision = report["precision"]
+            recall = report["recall"]
+
+            print(f"Precision: {precision}. Recall: {recall}. F1: {f1_score}")
+            with open(output.f1, "w") as f:
+                f.write(str(f1_score))
+
+            with open(output.precision, "w") as f:
+                f.write(str(precision))
+
+            with open(output.recall, "w") as f:
+                f.write(str(recall))

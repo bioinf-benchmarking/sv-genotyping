@@ -71,14 +71,16 @@ class RawPopulation:
 @parameters
 class PopulationWithoutIndividual:
     population: RawPopulation
-    individual_id: int = 1
+    individual_source: Literal["from_pangenome", "remote"]
+    individual_id: str = "1"
     file_ending = "/population_without_individual.vcf.gz"
 
 
 @parameters
 class Individual:
     population: RawPopulation
-    individual_id: int = 1
+    individual_source: Literal["from_pangenome", "remote"]
+    individual_id: str = "1"
     file_ending = "/individual.vcf"
 
 
@@ -89,7 +91,7 @@ class StratifiedIndividual:
     """
     individual: Individual
     stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
     file_ending = "/individual.vcf"
 
 
@@ -159,7 +161,7 @@ class GenotypeResults:
 class StratifiedGenotypeResults:
     genotype_results: GenotypeResults
     stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
     individual_filter: Literal["none", "only_variants_in_population", "only_variants_in_population_isec"] = "none"
     file_ending = "/genotypes.vcf"
 
@@ -188,6 +190,26 @@ class PangenieReport:
     genotype_results: BestGenotypes
     limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
     file_ending="/report.txt"
+
+
+@parameters
+class TruvariReport:
+    genotype_results: BestGenotypes
+    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+    file_ending="/truvari_report.json"
+
+@result
+class TruvariF1Score:
+    truvari_report: TruvariReport
+
+@result
+class TruvariRecall:
+    truvari_report: TruvariReport
+
+@result
+class TruvariPrecision:
+    truvari_report: TruvariReport
+
 
 @result
 class VcfEvalReport:
@@ -235,8 +257,10 @@ class GenotypeRuntime:
 @parameters
 class GenomeStratification:
     genome_build: GenomeBuild
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
     file_ending = ".bed"
+
+
 
 
 
