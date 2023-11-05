@@ -42,7 +42,7 @@ class SimulatedVariantSource:
 class RealVariantSource:
     base_genome: BaseGenome
     folder_name: Literal["real_variants"] = "real_variants"
-    database_name: Literal["1000genomes", "hprc"] = "1000genomes"
+    database_name: Literal["1000genomes", "hprc", "polaris"] = "1000genomes"
     variant_type: Literal["snps_indels", "svs", "all"] = "snps_indels"
     file_ending = "/unfiltered_population.vcf.gz"
 
@@ -71,7 +71,7 @@ class RawPopulation:
 @parameters
 class PopulationWithoutIndividual:
     population: RawPopulation
-    individual_source: Literal["from_pangenome", "remote"]
+    individual_source: Literal["from_pangenome", "remote"] = "from_pangenome"
     individual_id: str = "1"
     file_ending = "/population_without_individual.vcf.gz"
 
@@ -91,7 +91,7 @@ class StratifiedIndividual:
     """
     individual: Individual
     stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant", "syndip-confident-regions"] = "all"
     file_ending = "/individual.vcf"
 
 
@@ -122,6 +122,13 @@ class FilteredPopulation:
 
 
 @parameters
+class FilteredPopulationWithCollapsedAlleles:
+    population: FilteredPopulation
+    collapse_threshold: float = 0.99
+    file_ending = "/filtered_population_with_collapsed_alleles.vcf.gz"
+
+
+@parameters
 class Reads:
     # Reads are implicitly simulated from the individual that is removed from the population
     individual: Individual
@@ -141,7 +148,7 @@ class RealRawReads:
 @parameters
 # Necessay to group reads and population so that GenotypeResults have one dependency
 class ReadsAndFilteredPopulation:
-    population: FilteredPopulation  # FilteredPopulation has reference to Individual
+    population: FilteredPopulationWithCollapsedAlleles  # FilteredPopulation has reference to Individual
     read_source: Literal["simulated", "real"] = "simulated"
     read_length: int = 150
     coverage: float = 10.0
@@ -152,7 +159,7 @@ class ReadsAndFilteredPopulation:
 @parameters
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
-    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph"] = "kage"
+    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph", "manta"] = "kage"
     n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
@@ -161,7 +168,7 @@ class GenotypeResults:
 class StratifiedGenotypeResults:
     genotype_results: GenotypeResults
     stratification_variant_type: Literal["snps", "indels", "large_indels", "snps_indels", "svs", "svs_other", "all", "sv_deletions", "sv_insertions"] = "snps_indels"
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant", "syndip-confident-regions"] = "all"
     individual_filter: Literal["none", "only_variants_in_population", "only_variants_in_population_isec"] = "none"
     file_ending = "/genotypes.vcf"
 
@@ -257,15 +264,21 @@ class GenotypeRuntime:
 @parameters
 class GenomeStratification:
     genome_build: GenomeBuild
-    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant"] = "all"
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant", "syndip-confident-regions"] = "all"
+    file_ending = ".bed"
+
+
+@parameters
+class GenomeStratificationOnDataset:
+    base_genome: BaseGenome
+    stratification_type: Literal["all", "easy", "low-mappability", "repeats", "other-difficult", "medically-relevant", "syndip-confident-regions"] = "all"
     file_ending = ".bed"
 
 
 
 
 
-print(FilteredPopulation.path())
-
+print(GenotypeResults.path(method="manta",file_ending="/genotypes.vcf.gz"))
 
 include: "rules/variant_simulation.smk"
 include: "rules/population_simulation.smk"
@@ -277,9 +290,11 @@ include: "rules/tests.smk"
 include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
 include: "rules/bwa.smk"
+include: "rules/manta.smk"
 include: "rules/paragraph.smk"
 include: "rules/real_reads.smk"
 include: "rules/glimpse.smk"
+include: "rules/polaris.smk"
 
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")

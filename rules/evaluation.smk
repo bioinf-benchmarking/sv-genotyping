@@ -72,8 +72,8 @@ ruleorder: genotype_accuracy_multiallelic > genotype_accuracy
 rule kage_debug:
     input:
         truth = Individual.path(),
-        genotypes = GenotypeResults.path(),
-        index=GenotypeResults.path(file_ending="/index.npz"),
+        genotypes = BestGenotypes.path(),
+        index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
         report = GenotypeReport.path(),
         node_counts = GenotypeResults.path(file_ending="/genotypes.vcf.node_counts.npy")
     output:
@@ -113,6 +113,39 @@ rule download_genome_stratification:
         gunzip = lambda wildcards: " | gunzip -c" if get_stratification_file(wildcards).endswith(".gz") else ""
     shell:
         "wget -O - {params.file} {params.gunzip} > {output} {params.remove_chr_prefix}"
+
+
+rule download_syndip_genome_stratification:
+    input:
+        "data/syndip.tar"
+    output:
+        GenomeStratification.path(stratification_type="syndip-confident-regions")
+    params:
+        remove_chr_prefix= lambda wildcards,input,output: " && sed -i 's/chr//g' " + output[0] if config["genomes"][wildcards.genome_build]["remove_chr_prefix"] else "",
+    shell:
+        "tar -xvf syndip.tar && "
+        "zcat CHM-eval.kit/full.38.bed.gz > {output} {params.remove_chr_prefix}"
+
+
+ruleorder: download_syndip_genome_stratification > download_genome_stratification
+
+
+rule subset_genome_stratification_on_dataset:
+    input:
+        stratification=GenomeStratification.path(),
+        reference=BaseGenome.path(file_ending="/reference.fa.fai")
+    output:
+        stratification=GenomeStratificationOnDataset.path()
+    run:
+        with open(input.reference) as ref:
+            chromosomes = set([line.split()[0] for line in ref.readlines()])
+
+        with open(input.stratification) as strat:
+            with open(output.stratification, "w") as out:
+                for line in strat.readlines():
+                    if line.split()[0] in chromosomes:
+                        out.write(line)
+
 
 
 
@@ -385,7 +418,7 @@ rule run_truvari:
         truth_index = FilteredIndividual.path(file_ending="/individual.vcf.gz.tbi"),
         sample = BestGenotypes.path(file_ending="/genotypes.vcf.gz"),
         sample_index = BestGenotypes.path(file_ending="/genotypes.vcf.gz.tbi"),
-        regions = GenomeStratification.path(),
+        regions = GenomeStratificationOnDataset.path(),
         ref = BaseGenome.path()
     output:
         report = TruvariReport.path()

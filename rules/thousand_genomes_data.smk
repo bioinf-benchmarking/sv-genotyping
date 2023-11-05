@@ -287,4 +287,31 @@ rule filter_population:
         "bcftools view -S {input.sample_names} -O z -o {output.vcf} {input.vcf}"
 
 
+rule collapse_similar_alleles_in_population:
+    input:
+        vcf = FilteredPopulation.path(),
+        index = FilteredPopulation.path(file_ending="/filtered_population.vcf.gz.tbi"),
+    output:
+        vcf = FilteredPopulationWithCollapsedAlleles.path()
+    conda:
+        "../envs/truvari.yml"
+    shell:
+        "truvari collapse -r 1 -p {wildcards.collapse_threshold} -i {input.vcf} | bgzip -c > {output}"
+
+
+rule collapse_similar_alleles_in_population_no_collapse:
+    # When similarity parameter is 1.0, no collapsing
+    input:
+        vcf=FilteredPopulation.path(),
+        index=FilteredPopulation.path(file_ending="/filtered_population.vcf.gz.tbi"),
+    output:
+        vcf = FilteredPopulationWithCollapsedAlleles.path(collapse_threshold=1.0)
+    conda:
+        "../envs/truvari.yml"
+    shell:
+        "cp {input.vcf} {output.vcf}"
+
+
+ruleorder: collapse_similar_alleles_in_population_no_collapse > collapse_similar_alleles_in_population
+
 

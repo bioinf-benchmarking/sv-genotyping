@@ -75,11 +75,40 @@ rule download_individual:
         "../envs/bcftools.yml"
     params:
         chromosomes= lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
-        url = lambda wildcards: config["real_individuals"][wildcards.individual_id]
+        url = lambda wildcards: config["real_individuals"][wildcards.individual_id] if wildcards.individual_id in config["real_individuals"] else ""
     shell:
         """
         wget -O - {params.url} | zcat > {output.individual}.tmp.vcf &&
         sed 's/chr//g' {output.individual}.tmp.vcf | bgzip -c > {output.individual}.tmp.vcf.gz &&
         tabix -f -p vcf {output.individual}.tmp.vcf.gz &&
-        bcftools view --regions {params.chromosomes} {output.individual}.tmp.vcf.gz > {output.individual}
+        bcftools view --regions {params.chromosomes} {output.individual}.tmp.vcf.gz > {output.individual} &&
+        sed -i 's/chr//g' {output.individual}
         """
+
+rule download_syndip:
+    output:
+        "data/syndip.tar"
+    shell:
+        """
+        wget -O {output} https://github.com/lh3/CHM-eval/releases/download/v0.5/CHM-evalkit-20180222.tar
+        """
+
+
+rule get_syndip_individual:
+    input:
+        "data/syndip.tar"
+    output:
+        individual = Individual.path(individual_source="remote", individual_id="syndip")
+    conda:
+        "../envs/bcftools.yml"
+    params:
+        chromosomes = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
+    shell:
+        "tar -xvf {input} && "
+        "bcftools norm -m -any CHM-eval.kit/full.38.vcf.gz > {output.individual}.tmp && "
+        "sed 's/chr//g' {output.individual}.tmp | bgzip -c > {output.individual}.tmp.vcf.gz && "
+        "tabix -f -p vcf {output.individual}.tmp.vcf.gz && "
+        "bcftools view --regions {params.chromosomes} {output.individual}.tmp.vcf.gz > {output.individual} "
+
+
+ruleorder: get_syndip_individual > download_individual

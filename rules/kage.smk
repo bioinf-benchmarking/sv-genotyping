@@ -21,22 +21,22 @@ rule remove_genotype_info_gz:
 rule kage_index:
     input:
         reference = BaseGenome.path(),
-        population_vcf = FilteredPopulation.path(),
-        population_vcf_no_genotypes = FilteredPopulation.path(file_ending="/filtered_population_no_genotypes.vcf.gz"),
+        population_vcf = FilteredPopulationWithCollapsedAlleles.path(),
+        population_vcf_no_genotypes = FilteredPopulationWithCollapsedAlleles.path(file_ending="/filtered_population_with_collapsed_alleles_no_genotypes.vcf.gz"),
     output:
-       index = FilteredPopulation.path(file_ending="/kage_index.npz")
+       index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz")
     threads:
         lambda wildcards: 8
     shell:
         """
         kage index -r {input.reference} -v {input.population_vcf} -V {input.population_vcf_no_genotypes} -o {output.index}  \
-        --make-helper-model True --modulo 200000033 --variant-window 5 -k 31
+        --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
         """
 
 
 rule run_kage_no_impuation:
     input:
-        index = FilteredPopulation.path(file_ending="/kage_index.npz"),
+        index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage_no_imputation")
@@ -51,7 +51,7 @@ rule run_kage_no_impuation:
 
 rule run_kage:
     input:
-        index = FilteredPopulation.path(file_ending="/kage_index.npz"),
+        index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
         results = GenotypeResults.path(method="kage"),
@@ -67,5 +67,5 @@ rule run_kage:
         "-t {wildcards.n_threads} "
         "--average-coverage {wildcards.coverage} "
         "-k 31 "
-        "--ignore-homo-ref True"  # don't write homo ref variants for faster writing
+        #"--ignore-homo-ref True"  # don't write homo ref variants for faster writing
 

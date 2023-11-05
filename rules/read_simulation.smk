@@ -20,8 +20,8 @@ rule simulate_reads2:
         --vcf {input.individual} \
         --fasta {input.reference} \
         --paired-end True \
-        --paired-end-insert-size 500 \
-        --paired-end-insert-sd 50
+        --paired-end-insert-size 300 \
+        --paired-end-insert-sd 30
         """
 
 

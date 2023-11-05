@@ -23,9 +23,9 @@ with open(sys.argv[1]) as f:
             try:
                 qualities.append(float(line.split()[9].split(":")[-1]))
             except ValueError:
-                logging.error("ERror parsing quality score from line. Setting score to 0")
+                logging.debug("ERror parsing quality score from line. Setting score to 0")
                 qualities.append(0)
-                logging.error("Genotype column: %s" % line.split()[9])
+                #logging.error("Genotype column: %s" % line.split()[9])
 
     qualities = np.array(qualities)
     sorting = np.argsort(qualities)

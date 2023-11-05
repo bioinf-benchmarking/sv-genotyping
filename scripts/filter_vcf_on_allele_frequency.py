@@ -15,6 +15,7 @@ to_keep = []
 
 with bnp.open(in_file, buffer_type=bnp.io.VCFBuffer) as f:
     for chunk in f.read_chunks(200000000):
+        logging.info("Processing chunk of size %d" % len(chunk))
         is_sv = (chunk.ref_seq.shape[1] >= 50) | (chunk.alt_seq.shape[1] >= 50)
 
         # hacky way to get allele frequency fast

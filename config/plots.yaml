@@ -15,6 +15,7 @@ default_parameter_sets:
   small_indel_rate: 0.01
   sv_indel_rate: 0.005
   ratio_of_best_genotypes: [0.05, 0.25, 0.5, 0.75, 1.0]
+  stratification_type: all
 
 
 # Axis/titles/etc that will be replaced in plots
@@ -60,6 +61,7 @@ plots:
       allele_frequency_svs: 0
       method: ["kage", "pangenie"]  #, "kage_with_glimpse"]
       stratification_variant_type: ["svs", "snps", "indels"]  # ["snps", "indels", "svs", "all"]
+      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
       individual_id: 1
     type_limits:
       source: RealVariantSource
@@ -214,6 +216,28 @@ plots:
   hprc_plot:
     plot_type: hprc_plot
     parameters:
+      size: big
+      genome_build: hg38
+      database_name: "hprc"
+      n_individuals: 44
+      individual_id: ["24"]
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: pangenie
+      coverage: 30
+      variant_type: all
+      stratification_variant_type: [sv_deletions, sv_insertions, svs_other]
+      stratification_type: [easy, repeats, low-mappability, other-difficult]
+      ratio_of_best_genotypes: 1.0
+      n_threads: 24
+      individual_filter: [none, only_variants_in_population]
+    type_limits:
+      source: RealVariantSource
+
+  hprc_plot_real_reads:
+    plot_type: hprc_plot
+    parameters:
+      read_source: "real"
       size: big
       genome_build: hg38
       database_name: "hprc"

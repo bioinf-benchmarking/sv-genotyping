@@ -4,7 +4,7 @@ rule test_kage:
     input:
         #f1 = "data/sacCer3/medium/0.01/0.001/0/0.3/0.8/25/1/150/10.0/kage/1/all/GenotypeF1Score.txt"
         #f1 = "data/sacCer3/medium/0.01/0.001/0/0.3/0.8/0.0001/0.0001/20/1/150/10.0/kage/1/all/GenotypeF1Score.txt"
-        f1= "data/sacCer3/medium/0.01/0.001/0/0.3/0.8/from_pangenome/1/0.0001/0.0001/20/simulated/150/10.0/0.001/kage/1/all/all/none/1.0/all/GenotypeF1Score.txt"
+        f1= "data/sacCer3/medium/0.01/0.001/0/0.3/0.8/from_pangenome/1/0.0001/0.0001/20/1.0/simulated/150/10.0/0.001/kage/1/all/all/none/1.0/all/GenotypeF1Score.txt"
 
     output:
         touch("test_kage")
