@@ -18,7 +18,8 @@ for line in sys.stdin:
 	for i,a in enumerate(alleles):
 		var_len = len(a)
 		var_type = 'allele' + str(i+1)
-		var_id = '-'.join([chrom, position, var_type, str(var_len)])
+		#var_id = '-'.join([chrom, position, var_type, str(var_len)])
+		var_id = '-'.join([chrom, position, var_type, a])
 		ids.append(var_id)
 	info_fields['ID'] = ','.join(ids)
 	updated_info = []

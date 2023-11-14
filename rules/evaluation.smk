@@ -72,14 +72,14 @@ ruleorder: genotype_accuracy_multiallelic > genotype_accuracy
 rule kage_debug:
     input:
         truth = Individual.path(),
-        genotypes = BestGenotypes.path(),
+        genotypes = GenotypeResults.path(),
         index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
         report = GenotypeReport.path(),
         node_counts = GenotypeResults.path(file_ending="/genotypes.vcf.node_counts.npy")
     output:
         debug = touch(GenotypeDebug.path())
     shell:
-        "kage debug -i {input.index} -g {input.genotypes} -t {input.truth} -r {input.report} -n {input.node_counts}"
+        "kage debug -i {input.index} -g {input.genotypes} -t {input.truth} -r {input.report} -n {input.node_counts} --probs {input.genotypes}.probs.npy --count-probs {input.genotypes}.count_probs.npy --numeric-genotypes {input.genotypes}.genotypes.npy"
 
 
 

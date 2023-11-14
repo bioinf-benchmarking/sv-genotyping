@@ -66,6 +66,6 @@ rule run_kage:
         "-o {output.results} "
         "-t {wildcards.n_threads} "
         "--average-coverage {wildcards.coverage} "
-        "-k 31 "
+        "-k 31 --write-debug-data True"
         #"--ignore-homo-ref True"  # don't write homo ref variants for faster writing
 

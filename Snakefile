@@ -108,6 +108,7 @@ class AlleleFrequencyFilteredPopulation:
     population: PopulationWithoutIndividual
     allele_frequency_svs: float = 0.1
     allele_frequency_snps_indels: float = 0.3
+    minor_allele_in_multiallelic_variants_min_frequency: float = 0.0  # minimum frequency for alleles in multiallelic variants. 0.0 means no filtering
     file_ending = "/allele_frequency_filtered_population.vcf.gz"
 
 

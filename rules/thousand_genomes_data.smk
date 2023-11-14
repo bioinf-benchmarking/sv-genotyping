@@ -265,12 +265,14 @@ rule filter_population_allele_frequency:
     input:
         vcf= PopulationWithoutIndividual.path(),
         index=PopulationWithoutIndividual.path(file_ending="/population_without_individual.vcf.gz.tbi"),
+        ref = ReferenceGenome.path()
     output:
         vcf = AlleleFrequencyFilteredPopulation.path()
     conda:
         "../envs/bcftools.yml"
     shell:
-        "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | bgzip -c > {output.vcf}"
+        "python scripts/filter_vcf_on_allele_frequency.py {input.vcf} {wildcards.allele_frequency_svs} {wildcards.allele_frequency_snps_indels} | bgzip -c > {output.vcf}.tmp.vcf.gz && "
+        "kage filter_low_freq_alleles -r {input.ref} -f {wildcards.minor_allele_in_multiallelic_variants_min_frequency} -v {output.vcf}.tmp.vcf.gz --only-deletions True | bgzip -c > {output.vcf} "
 
 
 rule filter_population:
