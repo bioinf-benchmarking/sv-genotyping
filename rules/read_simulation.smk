@@ -1,10 +1,23 @@
 import os
 
+rule remove_homo_ref_from_vcf:
+    input:
+        "{path}/individual.vcf"
+    output:
+        "{path}/individual_no_homo_ref.vcf"
+    conda:
+        "../envs/bcftools.yml"
+    shell:
+        """
+        bcftools view --min-ac 1 {input} > {output}
+        """
+
+
 rule simulate_reads2:
     input:
         reference=BaseGenome.path(),
         index=BaseGenome.path(file_ending="/reference.fa.fai"),
-        individual=Individual.path(),
+        individual=Individual.path(file_ending="/individual_no_homo_ref.vcf"),
     output:
         Reads.path(read_source="simulated", file_ending="/reads.fq.gz")
     threads:

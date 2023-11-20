@@ -147,6 +147,20 @@ rule subset_genome_stratification_on_dataset:
                         out.write(line)
 
 
+# the "all" stratification, should just create a file of the whole dataset region
+rule subset_genome_stratification_on_dataset_all:
+    input:
+        reference=BaseGenome.path(file_ending="/reference.fa.fai")
+    output:
+        stratification=GenomeStratificationOnDataset.path(stratification_type="all")
+    run:
+        with open(input.reference) as ref:
+            with open(output.stratification, "w") as out:
+                for line in ref:
+                    l = line.split()
+                    out.write(f"{l[0]}\t0\t{l[1]}\n")
+
+ruleorder: subset_genome_stratification_on_dataset_all > subset_genome_stratification_on_dataset
 
 
 rule subset_genotypes_on_stratification:
@@ -436,6 +450,7 @@ rule run_truvari:
         --refdist 500 \
         --chunksize 500 \
         --reference {input.ref} \
+        --pick ac \
         --includebed {input.regions} \
         --no-ref a && 
         mv {params.out_dir}/summary.json {output.report}
