@@ -95,6 +95,25 @@ rule get_runtime:
         "cat {input} | tail -n 1 | cut -f 1 > {output}"
 
 
+# this is a sum of kage runtime + glimpse runtime
+rule get_kage_with_glimpse_runtime:
+    input:
+        kage=GenotypeResults.as_output(method="kage_no_imputation", file_ending="/benchmark.csv"),
+        glimpse=GenotypeResults.path(method="kage_with_glimpse", file_ending="/glimpse.csv")
+    output:
+        GenotypeRuntime.path(method="kage_with_glimpse")
+    run:
+        kage_time = float(open(input.kage).readlines()[-1].split()[0])
+        glimpse_time = float(open(input.glimpse).readlines()[-1].split()[0])
+        with open(output[0], "w") as f:
+            f.write(str(kage_time + glimpse_time))
+
+
+ruleorder: get_kage_with_glimpse_runtime > get_runtime
+
+#f"data/{parameters}/runtime.txt"
+
+
 def get_stratification_file(wildcards):
     try:
         file = config["genome_stratification_files"][wildcards.genome_build][wildcards.stratification_type]
@@ -450,8 +469,9 @@ rule run_truvari:
         --refdist 500 \
         --chunksize 500 \
         --reference {input.ref} \
-        --pick ac \
+        --pick multi \
         --includebed {input.regions} \
+        -B 10 -s 10 -S 10 \
         --no-ref a && 
         mv {params.out_dir}/summary.json {output.report}
         """

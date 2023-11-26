@@ -30,23 +30,24 @@ rule kage_index:
     shell:
         """
         kage index -r {input.reference} -v {input.population_vcf} -V {input.population_vcf_no_genotypes} -o {output.index}  \
-        --make-helper-model True --modulo 200000033 --variant-window 7 -k 31
+        --modulo 200000033 --variant-window 7 -k 31 --min-af-deletions-filter 0.1
         """
 
 
-rule run_kage_no_impuation:
+rule run_kage_no_imputation:
     input:
         index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
         reads = Reads.path(file_ending="/reads.fq.gz")
     output:
-        results = GenotypeResults.path(method="kage_no_imputation")
+        results = GenotypeResults.path(method="kage_no_imputation"),
+        node_counts= GenotypeResults.path(method="kage_no_imputation",file_ending="/genotypes.vcf.node_counts.npy")
     benchmark:
         GenotypeResults.path(method="kage_no_imputation", file_ending="/benchmark.csv")
     shell:
         "kage genotype -i {input.index} -r {input.reads} "
         " -o {output.results} -t {wildcards.n_threads} "
         "--average-coverage {wildcards.coverage} -k 31 "
-        "--ignore-helper-model True "
+        "--ignore-helper-model True --write-debug-data True"
 
 
 rule run_kage:

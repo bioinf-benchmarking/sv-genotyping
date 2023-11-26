@@ -283,10 +283,13 @@ rule filter_population:
         sample_names = PopulationWithoutIndividual.path(file_ending="/population_without_individual.{n_individuals}_random_sample_names.txt")
     output:
         vcf = FilteredPopulation.path()
+    params:
+        # if we only want variants supported by individuals, filter so that min allele count is 1
+        filter_command = lambda wildcards: " | bcftools view --min-ac 1  " if wildcards.population_type == "only_variants_supported_by_individuals" else ""
     conda:
         "../envs/bcftools.yml"
     shell:
-        "bcftools view -S {input.sample_names} -O z -o {output.vcf} {input.vcf}"
+        "bcftools view -S {input.sample_names}  {input.vcf} {params.filter_command} | bgzip -c > {output}"
 
 
 rule collapse_similar_alleles_in_population:
@@ -298,7 +301,7 @@ rule collapse_similar_alleles_in_population:
     conda:
         "../envs/truvari.yml"
     shell:
-        "truvari collapse -r 1 -p {wildcards.collapse_threshold} -i {input.vcf} | bgzip -c > {output}"
+        "truvari collapse -r 1 -p {wildcards.collapse_threshold} -P {wildcards.collapse_threshold} -i {input.vcf} | bgzip -c > {output}"
 
 
 rule collapse_similar_alleles_in_population_no_collapse:

@@ -12,13 +12,27 @@ rule make_paragraph_samples_file:
         """
 
 
+rule pad_indels_for_paragraph:
+    input:
+        ref = BaseGenome.path(),
+        vcf=FilteredPopulation.path(file_ending="/filtered_population_no_genotypes.vcf.gz"),
+    output:
+        vcf=FilteredPopulation.path(file_ending="/filtered_population_no_genotypes_padded.vcf"),
+        vcf_gz=FilteredPopulation.path(file_ending="/filtered_population_no_genotypes_padded.vcf.gz")
+    shell:
+        """
+        python scripts/fix_vcf_for_paragraph.py {input.ref} {input.vcf} {output.vcf} && bcftools sort {output.vcf} | bgzip -c > {output.vcf_gz}
+        """
+
+
+
 # Paragrap resorst to vcf with 1 individual, n_individuals doesn't matter for Paragraph, should give same output independelly of individuals in vcf
 rule run_paragraph:
     input:
         sample_file=GenotypeResults.path(n_individuals=1, method="paragraph", file_ending="/samples.txt"),
         reference = BaseGenome.path(),
-        variants = FilteredPopulation.path(n_individuals=1, file_ending="/filtered_population_no_genotypes.vcf.gz"),
-        index = FilteredPopulation.path(n_individuals=1, file_ending="/filtered_population_no_genotypes.vcf.gz.tbi"),
+        variants = FilteredPopulation.path(n_individuals=1, file_ending="/filtered_population_no_genotypes_padded.vcf.gz"),
+        index = FilteredPopulation.path(n_individuals=1, file_ending="/filtered_population_no_genotypes_padded.vcf.gz.tbi"),
         mapped_reads = Reads.path(file_ending="/reads.bam")
     output:
         results = GenotypeResults.path(n_individuals=1, method="paragraph", file_ending="/genotypes.vcf")
@@ -26,6 +40,8 @@ rule run_paragraph:
         output_folder = lambda wildcards, input, output: os.path.sep.join(output.results.split(os.path.sep)[:-1])
     threads:
         lambda wildcards: int(wildcards.n_threads)
+    benchmark:
+        GenotypeResults.path(method="paragraph", n_individuals=1, file_ending="/benchmark.csv")
     conda:
         "../envs/paragraph.yml"
     shell:
@@ -41,11 +57,13 @@ rule run_paragraph:
 
 rule run_paragraph_wrapper:
     input:
-        GenotypeResults.path(n_individuals=1,method="paragraph",file_ending="/genotypes.vcf")
+        vcf=GenotypeResults.path(n_individuals=1,method="paragraph",file_ending="/genotypes.vcf"),
+        benchmark=GenotypeResults.path(n_individuals=1,method="paragraph",file_ending="/benchmark.csv")
     output:
-        GenotypeResults.path(method="paragraph",file_ending="/genotypes.vcf")
+        vcf=GenotypeResults.path(method="paragraph",file_ending="/genotypes.vcf"),
+        benchmark=GenotypeResults.path(method="paragraph",file_ending="/benchmark.csv")
     shell:
-        "cp {input} {output} "
+        "cp {input.vcf} {output.vcf} &&  cp {input.benchmark} {output.benchmark}"
 
 
 """

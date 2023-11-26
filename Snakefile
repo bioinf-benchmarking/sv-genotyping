@@ -119,13 +119,14 @@ class FilteredPopulation:
     #allele_frequency_svs: float = 0.1
     #allele_frequency_snps_indels: float = 0.3
     n_individuals: int = 10
+    population_type: Literal["all_variants", "only_variants_supported_by_individuals"] = "all_variants"
     file_ending = "/filtered_population.vcf.gz"
 
 
 @parameters
 class FilteredPopulationWithCollapsedAlleles:
     population: FilteredPopulation
-    collapse_threshold: float = 0.99
+    collapse_threshold: float = 1.0
     file_ending = "/filtered_population_with_collapsed_alleles.vcf.gz"
 
 
@@ -160,7 +161,7 @@ class ReadsAndFilteredPopulation:
 @parameters
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
-    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph", "manta"] = "kage"
+    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph", "manta", "delly", "bayestyper"] = "kage"
     n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
@@ -256,8 +257,7 @@ class WeightedGenotypeConcordance:
 
 @result
 class GenotypeRuntime:
-    genotype_results: BestGenotypes
-    limit_accuracy_to_variant_type: Literal["all", "snps", "indels", "snps_indels", "svs"] = "all"
+    genotype_results: GenotypeResults
 
 
 
@@ -279,12 +279,11 @@ class GenomeStratificationOnDataset:
 
 
 
-print(GenotypeResults.path(method="manta",file_ending="/genotypes.vcf.gz"))
-
 include: "rules/variant_simulation.smk"
 include: "rules/population_simulation.smk"
 include: "rules/read_simulation.smk"
 include: "rules/pangenie.smk"
+include: "rules/bayestyper.smk"
 include: "rules/evaluation.smk"
 include: "rules/kage.smk"
 include: "rules/tests.smk"
@@ -292,6 +291,7 @@ include: "rules/thousand_genomes_data.smk"
 include: "rules/hprc_data.smk"
 include: "rules/bwa.smk"
 include: "rules/manta.smk"
+include: "rules/delly.smk"
 include: "rules/paragraph.smk"
 include: "rules/real_reads.smk"
 include: "rules/glimpse.smk"

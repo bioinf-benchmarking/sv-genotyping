@@ -1,5 +1,10 @@
 import os
 
+def get_chromosomes(wildcards):
+    out = ",".join([c.split(":")[0] for c in config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"].split(",")])
+    return out
+
+
 # GLIMPSE has no working conda or anything
 # to make installation backwards compatible, download static binaries from release
 rule install_glimpse:
@@ -23,7 +28,8 @@ rule make_glimpse_chunks:
         FilteredPopulation.path(file_ending="/glimpse_chunks.txt"),
         #"data/{dataset}/glimpse_chunks.txt"
     params:
-        regions = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
+        #regions = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
+        regions = get_chromosomes,
         base_path = lambda wildcards, input, output: os.sep.join(output[0].split(os.sep)[:-1]),
     shell:
         """
@@ -58,7 +64,8 @@ rule run_glimpse:
     conda: "../envs/bcftools.yml"
     threads: lambda wildcards: int(wildcards.n_threads)
     params:
-        regions = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
+        #regions = lambda wildcards: config["genomes"][wildcards.genome_build][wildcards.size]["chromosomes"],
+        regions = get_chromosomes,
         base_path = lambda wildcards, input, output: os.sep.join(output[0].split(os.sep)[:-1]),
     shell:
         """

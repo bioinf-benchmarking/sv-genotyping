@@ -207,12 +207,13 @@ class VCFGraph:
             else:  # indel style representation
                 if re.search(r'[^ACGTNXacgtnx]', alt):
                     raise Exception("Illegal character in ALT allele: %s" % alt)
-                if len(alt[0]) > 1 or len(ref_sequence) > 1:  # must have padding base for non-SNP
-                    if alt[0].upper() != ref_sequence[0]:
-                        raise Exception("Different padding base for REF and ALT at %s:%d" % (vcf.chrom, vcf.pos))
                 if vcf.ref:
                     if vcf.ref.upper() != ref_sequence:
                         logging.warning("%s:%d Genome REF is different from VCF. Use genome REF.", vcf.chrom, vcf.pos)
+                if len(alt[0]) > 1 or len(ref_sequence) > 1:  # must have padding base for non-SNP
+                    if alt[0].upper() != ref_sequence[0]:
+                        raise Exception("Different padding base for REF and ALT at %s:%d: %s %s" % (vcf.chrom, vcf.pos, alt, ref_sequence))
+
                 self.add_alt(vcf.pos, vcf.stop, ref_sequence, alt, alt_samples, refSamples)
 
     def add_ref_support(self, start, end, haplos=(), alleles=None):
