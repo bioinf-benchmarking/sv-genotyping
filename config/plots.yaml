@@ -102,6 +102,26 @@ plots:
       population_type: "only_variants_supported_by_individuals"
     type_limits:
       source: RealVariantSource
+
+  accuracy_vs_n_individuals_single_plot:
+    plot_type: truvari_f1_vs_n_individuals
+    parameters:
+      size: medium6
+      database_name: "hprc"
+      genome_build: hg38
+      n_individuals: [ 2, 5, 10, 25, 43 ]
+      variant_type: all
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: [ "kage_with_glimpse", "pangenie", "bayestyper" ]  #, "pangenie", "kage_with_glimpse"]
+      stratification_variant_type: "svs"  # "[ "svs", "sv_insertions", "sv_deletions" ]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
+      stratification_type: "all"  # "[ "all", "easy", "low-mappability", "repeats", "other-difficult" ]
+      individual_id: 1
+      coverage: 15
+      population_type: "only_variants_supported_by_individuals"
+    type_limits:
+      source: RealVariantSource
+
   read_coverage_single_plot:
     plot_type: accuracy_vs_read_coverage_single_plot
     parameters:
@@ -139,6 +159,25 @@ plots:
       individual_id: 1
       stratification_variant_type: ["svs", "sv_deletions", "sv_insertions"]
       stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
+    type_limits:
+      source: RealVariantSource
+
+  read_coverage_multiple_individuals:
+    plot_type: accuracy_vs_read_coverage_multiple_individuals
+    parameters:
+      size: medium6
+      database_name: "hprc"
+      genome_build: hg38
+      variant_type: all
+      n_individuals: 43
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: [ "pangenie", "kage_with_glimpse", "bayestyper"]
+      coverage: [ 1.0, 10.0, 20.0, 30.0 ]
+      n_threads: 8
+      individual_id: [1, 2, 3, 4, 5]
+      stratification_variant_type: ["svs", "sv_deletions", "sv_insertions"]
+      stratification_type: "all"
     type_limits:
       source: RealVariantSource
 
@@ -222,7 +261,8 @@ plots:
       variant_type: all
       allele_frequency_snps_indels: [0.0001, 0.001, 0.01, 0.1, 0.25, 0.5, 1.0]
       allele_frequency_svs: 0
-      method: [ "kage_no_imputation", "pangenie", "kage_with_glimpse" ]
+      #method: [ "kage", "kage_no_imputation", "pangenie", "kage_with_glimpse" ]
+      method: [ "bayestyper", "pangenie", "kage_with_glimpse" ]
       stratification_variant_type: ["svs", "sv_deletions", "sv_insertions"]
     type_limits:
       source: RealVariantSource
@@ -368,6 +408,29 @@ plots:
     type_limits:
       source: RealVariantSource
 
+  hprc_plot_big:
+    plot_type: f1_single_coverage
+    parameters:
+      read_source: "real"
+      size: big
+      genome_build: hg38
+      database_name: "hprc"
+      n_individuals: 44
+      individual_id: 1
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: [kage_with_glimpse, pangenie]
+      coverage: 15
+      variant_type: all
+      stratification_variant_type: [ svs, sv_deletions, sv_insertions ]
+      stratification_type: [ easy, repeats, low-mappability, other-difficult ]
+      ratio_of_best_genotypes: 1.0
+      n_threads: 24
+      individual_filter: [ none, only_variants_in_population ]
+    type_limits:
+      source: RealVariantSource
+
+
   # The following defines different type of plots
 # This includes only the description of the structure of each plot, not what values are used for the variables
 # Each of x_axis, y_axis, category_variable, color, labels, facet_col, facet_row
@@ -383,6 +446,13 @@ plot_types:
     facet_col: n_individuals
     facet_row: variant_type
 
+  f1_single_coverage:
+    type: bar
+    x: method
+    y: TruvariF1Score
+    facet_row: stratification_type
+    facet_col: stratification_variant_type
+
   f1_vs_n_individuals:
     type: line
     x: n_individuals
@@ -390,6 +460,12 @@ plot_types:
     color: method
     facet_row: stratification_type
     facet_col: stratification_variant_type
+
+  f1_vs_n_individuals_single_plot:
+    type: line
+    x: n_individuals
+    y: GenotypeF1Score
+    color: method
 
   truvari_f1_vs_n_individuals:
     type: line
@@ -402,9 +478,9 @@ plot_types:
   sv_accuracy_vs_snp_rate:
     type: line
     x: allele_frequency_snps_indels
-    y: GenotypeF1Score
+    y: TruvariF1Score
     color: method
-    facet_row: stratification_variant_type
+    facet_col: stratification_variant_type
 
   runtime_vs_n_individuals:
     type: line
@@ -435,6 +511,14 @@ plot_types:
     facet_col: stratification_variant_type
     #markers: True
     #labels: GenotypeF1Score
+
+  accuracy_vs_read_coverage_multiple_individuals:
+    type: line
+    x: coverage
+    y: TruvariF1Score
+    color: method
+    facet_row: individual_id
+    facet_col: stratification_variant_type
 
   roc:
     type: line

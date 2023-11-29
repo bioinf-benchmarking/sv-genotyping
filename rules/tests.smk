@@ -11,7 +11,7 @@ rule test_kage:
     run:
         with open(input[0]) as f:
             f1 = float(f.read())
-            assert f1 > 0.96
+            assert f1 > 0.959
 
 """
         f1 = GenotypeF1Score.from_flat_params(

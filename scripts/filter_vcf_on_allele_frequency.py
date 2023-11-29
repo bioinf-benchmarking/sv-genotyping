@@ -14,30 +14,12 @@ snps_indels_frequency = float(sys.argv[3])
 to_keep = []
 
 with bnp.open(in_file, buffer_type=bnp.io.VCFBuffer) as f:
-    for chunk in f.read_chunks(200000000):
+    for i, chunk in enumerate(f.read_chunks(20000000)):
         logging.info("Processing chunk of size %d" % len(chunk))
         is_sv = (chunk.ref_seq.shape[1] >= 50) | (chunk.alt_seq.shape[1] >= 50)
 
-        # hacky way to get allele frequency fast
-        if not hasattr(chunk.info, "AF"):
-            info_fields = bnp.io.strops.join(chunk.info, ";")
-            info_fields = bnp.io.strops.split(info_fields, sep=";")
-            af_strings = info_fields[bnp.str_equal(info_fields[:, 0:3], "AF=")]
-            assert len(af_strings) == len(chunk), "Not all lines contain AF=?"
-
-            #afs = np.array([float(af_string.to_string()) for af_string in af_strings[:, 3:]])
-            afs = (af_string.to_string() for af_string in af_strings[:, 3:])
-            afs = nps.RaggedArray(
-                [
-                    [float(af) for af in af_string.split(",")]
-                    for af_string in afs
-                ]
-            )
-            # use highest af
-            afs = np.max(afs, axis=-1)
-        else:
-            afs = chunk.info.AF
-            afs = bnp.io.strops.str_to_float(afs)
+        afs = chunk.info.AF[:, 0]
+        #afs = bnp.io.strops.str_to_float(afs)
 
         keep = (is_sv & (afs >= sv_frequency)) | (~is_sv & (afs >= snps_indels_frequency))
         to_keep.append(keep)
