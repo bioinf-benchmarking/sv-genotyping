@@ -33,14 +33,14 @@ The aim is that the user can configure runs without thinking about how steps are
 
 
 
-## How to run
+## How to setup the pipeline and run small experiments locally
+Simple experiments can be run simply by changing the config/plots.yaml file.
+
+(To be documented)
 
 
+## How to modify the pipline
 
-
-
-
-## How to contribute
-TODO
+(To be documented)
 
 
