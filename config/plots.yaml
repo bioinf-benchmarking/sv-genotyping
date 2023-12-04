@@ -83,6 +83,23 @@ plots:
     type_limits:
       source: RealVariantSource
 
+  plot1_hprc_tiny:
+    plot_type: truvari_f1_vs_n_individuals
+    parameters:
+      size: tiny3
+      database_name: "hprc"
+      genome_build: hg38
+      n_individuals: ['5', '25', '43']
+      variant_type: all
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: ["kage", "pangenie", "kage_with_glimpse", "kage_no_imputation"]
+      stratification_variant_type: ["svs", "sv_insertions", "sv_deletions"]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
+      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
+      individual_id: 1
+    type_limits:
+      source: RealVariantSource
+
   # with only variants supported by individuals
   accuracy_vs_n_individuals:
     plot_type: truvari_f1_vs_n_individuals
