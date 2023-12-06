@@ -294,7 +294,7 @@ include: "rules/manta.smk"
 include: "rules/delly.smk"
 include: "rules/paragraph.smk"
 include: "rules/real_reads.smk"
-include: "rules/glimpse.smk"
+#include: "rules/glimpse2.smk"
 include: "rules/polaris.smk"
 
 # for plotting

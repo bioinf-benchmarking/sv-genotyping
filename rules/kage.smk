@@ -70,3 +70,20 @@ rule run_kage:
         "-k 31 --write-debug-data True"
         #"--ignore-homo-ref True"  # don't write homo ref variants for faster writing
 
+
+rule run_kage_with_glimpse:
+   input:
+       index=FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
+       population_vcf=FilteredPopulationWithCollapsedAlleles.path(),
+       reads=Reads.path(file_ending="/reads.fq.gz")
+   output:
+       results=GenotypeResults.path(method="kage_with_glimpse"),
+       node_counts=GenotypeResults.path(method="kage_with_glimpse",file_ending="/genotypes.vcf.node_counts.npy")
+   benchmark:
+       GenotypeResults.path(method="kage_with_glimpse",file_ending="/benchmark.csv")
+   shell:
+       "kage genotype --glimpse {input.population_vcf} -i {input.index} -r {input.reads} "
+       " -o {output.results} -t {wildcards.n_threads} "
+       "--average-coverage {wildcards.coverage} -k 31 "
+       "--ignore-helper-model True --write-debug-data True"
+
