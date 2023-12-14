@@ -23,6 +23,7 @@ default_parameter_sets:
 pretty_names:
   ScaffolderAccuracy: Accuracy
   TruvariF1Score: "F1 score"
+  GenotypeRuntime: "Runtime (seconds)"
   pangenie: PanGenie
   kage_with_glimpse: KAGE2
   bayestyper: BayesTyper
@@ -40,13 +41,6 @@ plots:
   generic:
     # used as a dummy for plots that are not defined
     plot_type: ""
-  small_test:
-    plot_type: accuracy
-    parameters:
-      individual_id: 1
-      size: small
-      coverage: [5.0, 10.0]
-      n_individuals: [5, 10]
 
   test:
     plot_type: accuracy
