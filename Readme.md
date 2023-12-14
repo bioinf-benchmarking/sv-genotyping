@@ -1,7 +1,7 @@
 
 # Pipeline for benchmarking pangenomic structural variant genotyping
 
-This is a Snakemake pipeline for benchmarking the performance of various approaches for genotyping/calling structural variation using "pangenomes".
+This is a Snakemake pipeline for benchmarking the performance of various approaches for genotyping/calling structural variation using pangenomes.
 
 The aim of this pipeline is to make it easy to explore various methods and parameters and how they affect accuracy, e.g. how as filtering of pangenomes, pangenome size, pangenome complexity, structural vairant type, etc. affect accuracy.
 
@@ -34,6 +34,8 @@ The aim is that the user can configure runs without thinking about how steps are
 ## How to setup the pipeline and run small experiments locally
 This assumes you have conda and Snakemake already installed.
 
+NOTE: This pipeline is under development, and there may be missing conda dependencies. Please let us know through an Issue if you run into any problems.
+
 ### Step 1: Clone this repository
 ```bash
 git clone 
@@ -63,9 +65,9 @@ The pipeline contains variuous pre-configured experiments (defined in config/plo
 
 ### Creating a plot
 
-This pipeline follows the Snakemake principles, meaning that the user defines what the final result should be, and then the pipeline tries to run the necessary jobs for creating that output. For instance, you can ask for a plot where the x-axis is something, the y-axis is something and the pipeline will try to run what is needed to generate that plot. "Something" needs to be a valid *parameter* or *result_type* (see above), and based on that, the pipeline figures out what rules to run. For instance, the x-axis could be `method` (i.e. genotyper) and the y-axis can be `f1-score` and the pipeline will then run all methods and capture the F1 score and present that.
+This pipeline follows the "Snakemake principles", meaning that the user defines what the final result should be, and then the pipeline tries to run the necessary jobs for creating that output. For instance, you can ask for a plot where the x-axis is something, the y-axis is something and the pipeline will try to run what is needed to generate that plot. "Something" needs to be a valid *parameter* or *result_type* (see above), and based on that, the pipeline figures out what rules to run. For instance, the x-axis could be `method` (i.e. genotyper) and the y-axis can be `f1-score` and the pipeline will then run all methods and capture the F1 score and present that. Exactly what data is being used is defined through configuration in the `config/plots.yaml` file. This becomes more clear with an example:
 
-You can add a plot type by adding a configuration under `plot_types` in `config/plots.yaml`. Example:
+You add a **plot type** by adding a configuration under `plot_types` in `config/plots.yaml`. A plot type defines how an experiment is run, but not exactly which parameters are being used. Example:
 
 ```yaml
 plot_types:
@@ -84,18 +86,18 @@ The above **only** specifies a **plot_type**, not a plot. For instance, we say t
 ```yaml
 
 plots:
-    my_plot:
+  my_plot:
     plot_type: accuracy_vs_coverage
     parameters:
-      coverage: [2, 10, 30]
-      method: [kage_with_glimpse]
+      coverage: [0.1, 0.5, 2, 10]
+      method: [kage_no_imputation]
       sv_indel_rate: 0.01
     type_limits:
       source: SimulatedPopulation
   
 ```
 
-All parameters thare are not specified will be set to their default values (specified in the parameter configuration in Snakefile). Since source is an ambiguous parameter (the source can be either simulated or a real variant source), we need to specify under `type_limits` what the source is.
+All parameters that are not specified will be set to their default values (specified in the parameter configuration in Snakefile). Since source is an ambiguous parameter (the source can be either simulated or a real variant source), we need to specify under `type_limits` what the source is.
 
 We can now ask Snakemake to generate my_plot:
 
@@ -104,7 +106,9 @@ snakemake plots/my_plot.png
 ```
 .. which should create something like this:
 
-![Plot example](...)
+![Plot example](plots/my_plot.png){width=50%}
+
+Note that it is easy to add `facet_col: something` to the plot type, e.g `facet_row: read_length` and then add `read_length: [75, 100, 150]` to run the experiment for various read lengths and show the results on different rows.
 
 
 
