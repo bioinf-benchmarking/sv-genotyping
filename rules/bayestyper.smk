@@ -78,7 +78,7 @@ rule run_bayestyper:
         bloommeta=Reads.path(file_ending="/kmers_bayestyper.bloomMeta"),
         #bloomdata="data/{dataset}/{reads}.kmers_bayestyper.bloomData",
         #bloommeta="data/{dataset}/{reads}.kmers_bayestyper.bloomMeta",
-        variants=FilteredPopulationWithCollapsedAlleles.path(n_individuals=1, file_ending="/filtered_population_with_collapsed_alleles_no_genotypes_multiallelic.vcf"),
+        variants=FilteredPopulationWithCollapsedAlleles.path(file_ending="/filtered_population_with_collapsed_alleles_no_genotypes_multiallelic.vcf"),
         #variants="data/{dataset}/variants_no_genotypes_multiallelic.vcf",
         samples=Reads.path(file_ending="/samples.tsv"),
         #samples="data/{dataset}/samples_{reads}.tsv",
@@ -86,9 +86,9 @@ rule run_bayestyper:
         #units=dynamic("data/{dataset}/tmp_bayestyper_data_{reads}/bayestyper_unit_{unit_id}/variant_clusters.bin")
         #units="data/{dataset}/tmp_bayestyper_data_{reads}/bayestyper_unit_1/variant_clusters.bin"
         #genotypes="data/{dataset,\w+}/bayestyper_{reads}.vcf.gz"
-        genotypes=GenotypeResults.path(method="bayestyper", n_individuals=1, file_ending="/genotypes_multiallelic.vcf.gz")
+        genotypes=GenotypeResults.path(method="bayestyper", file_ending="/genotypes_multiallelic.vcf.gz")
     benchmark:
-        GenotypeResults.path(method="bayestyper", n_individuals=1, file_ending="/running_bayestyper.csv")
+        GenotypeResults.path(method="bayestyper", file_ending="/running_bayestyper.csv")
     params:
         out_prefix="bayestyper/bayestyper",
         tmp_dir=lambda wildcards, input, output: "/".join(output[0].split("/")[:-1]) + "/tmp/"
@@ -114,15 +114,16 @@ rule run_bayestyper:
 
 rule convert_bayestyper_multiallelic_to_biallelic:
     input:
-        genotypes=GenotypeResults.path(method="bayestyper", n_individuals=1, file_ending="/genotypes_multiallelic.vcf.gz"),
+        genotypes=GenotypeResults.path(method="bayestyper", file_ending="/genotypes_multiallelic.vcf.gz"),
         ref=BaseGenome.path()
     output:
-        genotypes=GenotypeResults.path(method="bayestyper", n_individuals=1,  file_ending="/genotypes.vcf")
+        genotypes=GenotypeResults.path(method="bayestyper", file_ending="/genotypes.vcf")
     conda: "../envs/bcftools.yml"
     shell:
         "bcftools norm -m -any -f {input.ref} {input.genotypes} > {output.genotypes}"
 
 
+"""
 rule run_bayestyper_wrapper:
     input:
         vcf=GenotypeResults.path(n_individuals=1,method="bayestyper",file_ending="/genotypes.vcf"),
@@ -130,13 +131,13 @@ rule run_bayestyper_wrapper:
         vcf=GenotypeResults.path(method="bayestyper",file_ending="/genotypes.vcf"),
     shell:
         "cp {input.vcf} {output.vcf}"
-
+"""
 
 rule add_bayestyper_benchmark_times:
     input:
         bloomfilter=Reads.path(file_ending="/bloomfilter.csv"),
         kmc=Reads.path(file_ending="/kmc.csv"),
-        bayestyper=GenotypeResults.path(method="bayestyper",n_individuals=1, file_ending="/running_bayestyper.csv")
+        bayestyper=GenotypeResults.path(method="bayestyper", file_ending="/running_bayestyper.csv")
     output:
         GenotypeRuntime.path(method="bayestyper")
     run:

@@ -46,14 +46,16 @@ rule pangenie_index:
         reference = BaseGenome.path(),
         population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
     output:
-        FilteredPopulation.path(file_ending=["/pangenie_index_path_segments.fasta", "/pangenie_index_UniqueKmersMap.cereal"])
+        FilteredPopulationWithCollapsedAlleles.path(file_ending=["/pangenie_index_path_segments.fasta", "/pangenie_index_UniqueKmersMap.cereal"])
     params:
         out_prefix = lambda wildcards, input, output: output[0].replace("index_path_segments.fasta", "index")
     threads:
-        8
+        16
+    benchmark:
+        FilteredPopulationWithCollapsedAlleles.path(file_ending="/pangenie.csv")
     shell:
         """
-        PanGenie-index -v {input.population_vcf} -r {input.reference} -t 8 -o {params.out_prefix}
+        PanGenie-index -v {input.population_vcf} -r {input.reference} -t 16 -o {params.out_prefix}
         """
 
 
@@ -61,7 +63,7 @@ rule run_pangenie:
     input:
         #reference = BaseGenome.path(),
         #population_vcf = FilteredPopulation.path(file_ending="/filtered_population.multiallelic.vcf"),
-        index = FilteredPopulation.path(file_ending="/pangenie_index_path_segments.fasta"),
+        index = FilteredPopulationWithCollapsedAlleles.path(file_ending="/pangenie_index_path_segments.fasta"),
         reads = Reads.path(file_ending="/reads.fq")
     output:
         results = GenotypeResults.path(method="pangenie", file_ending="/genotypes_multiallelic.vcf")

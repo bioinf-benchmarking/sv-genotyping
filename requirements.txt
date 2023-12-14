@@ -3,3 +3,4 @@ mapping_benchmarking @ git+https://github.com/bioinf-benchmarking/mapping-benchm
 diploid_sequence_simulator @ git+https://github.com/ivargr/diploid_sequence_simulator@master
 bnp_assembly @ git+https://github.com/knutdrand/bnp_assembly@master
 typer
+kage-genotyper

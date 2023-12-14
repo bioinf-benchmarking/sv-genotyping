@@ -130,6 +130,12 @@ class FilteredPopulationWithCollapsedAlleles:
     file_ending = "/filtered_population_with_collapsed_alleles.vcf.gz"
 
 
+@result
+class IndexingTime:
+    population: FilteredPopulationWithCollapsedAlleles
+    method: str
+
+
 @parameters
 class Reads:
     # Reads are implicitly simulated from the individual that is removed from the population
@@ -161,7 +167,7 @@ class ReadsAndFilteredPopulation:
 @parameters
 class GenotypeResults:
     reads: ReadsAndFilteredPopulation
-    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "pangenie_multiallelic", "paragraph", "manta", "delly", "bayestyper"] = "kage"
+    method: Literal["pangenie", "pangenie_v1.0.0", "kage", "kage_no_imputation", "kage_multiallelic", "kage_with_glimpse", "kage_with_glimpse_svs_imputed", "naive_genotyper", "naive_genotyper_with_glimpse", "pangenie_multiallelic", "paragraph", "manta", "delly", "bayestyper"] = "kage"
     n_threads: int = 4
     file_ending = "/genotypes.vcf"
 
@@ -293,6 +299,7 @@ include: "rules/bwa.smk"
 include: "rules/manta.smk"
 include: "rules/delly.smk"
 include: "rules/paragraph.smk"
+include: "rules/naive_genotyper.smk"
 include: "rules/real_reads.smk"
 #include: "rules/glimpse2.smk"
 include: "rules/polaris.smk"

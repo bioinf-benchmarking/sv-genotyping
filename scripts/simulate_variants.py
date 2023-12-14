@@ -42,7 +42,8 @@ def simulate(base_genome: str, snp_rate: float, small_indel_rate: float, sv_inde
         with open(out_file_name, "w") as out_file:
             out_file.write(header)
             for line in f:
-                out_file.write(line.strip() + "\tGT\n")
+                if not line.startswith("#"):
+                    out_file.write(line.strip() + "\tGT\n")
 
 
 if __name__ == "__main__":
