@@ -23,6 +23,8 @@ default_parameter_sets:
 pretty_names:
   ScaffolderAccuracy: Accuracy
   TruvariF1Score: "F1 score"
+  TruvariPrecision: "Precision"
+  TruvariRecall: "Recall"
   GenotypeRuntime: "Runtime (seconds)"
   pangenie: PanGenie
   kage_with_glimpse: KAGE2
@@ -55,57 +57,6 @@ plots:
       coverage: [3.0, 7.0, 15.0, 30.0]
       n_individuals: [5, 25, 50]
 
-
-  plot1:
-    plot_type: f1_vs_n_individuals 
-    parameters:
-      size: small
-      genome_build: hg38
-      n_individuals: ['5', '25', '60', '125', '500', '2500']
-      variant_type: all
-      allele_frequency_snps_indels: 0.01
-      allele_frequency_svs: 0
-      method: ["kage", "pangenie", "kage_with_glimpse"]
-      stratification_variant_type: ["svs", "snps", "indels"]  # ["snps", "indels", "svs", "all"]
-      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
-      individual_id: 1
-    type_limits:
-      source: RealVariantSource
-
-  plot1_hprc:
-    plot_type: truvari_f1_vs_n_individuals
-    parameters:
-      size: medium6
-      database_name: "hprc"
-      genome_build: hg38
-      n_individuals: ['5', '25', '43']
-      variant_type: all
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: ["kage", "pangenie", "kage_with_glimpse"]
-      stratification_variant_type: ["svs", "sv_insertions", "sv_deletions"]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
-      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
-      individual_id: 1
-    type_limits:
-      source: RealVariantSource
-
-  plot1_hprc_tiny:
-    plot_type: truvari_f1_vs_n_individuals
-    parameters:
-      size: tiny3
-      database_name: "hprc"
-      genome_build: hg38
-      n_individuals: ['5', '25', '43']
-      variant_type: all
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: ["kage", "pangenie", "kage_with_glimpse", "kage_no_imputation", "naive_genotyper_with_glimpse"]
-      stratification_variant_type: ["svs", "sv_insertions", "sv_deletions"]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
-      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
-      individual_id: 1
-    type_limits:
-      source: RealVariantSource
-
   # with only variants supported by individuals
   accuracy_vs_n_individuals:
     plot_type: truvari_f1_vs_n_individuals
@@ -120,25 +71,6 @@ plots:
       method: ["kage_with_glimpse", "pangenie", "bayestyper"]  #, "pangenie", "kage_with_glimpse"]
       stratification_variant_type: ["svs", "sv_insertions", "sv_deletions"]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
       stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
-      individual_id: 1
-      coverage: 15
-      population_type: "only_variants_supported_by_individuals"
-    type_limits:
-      source: RealVariantSource
-
-  accuracy_vs_n_individuals_single_plot:
-    plot_type: truvari_f1_vs_n_individuals
-    parameters:
-      size: medium6
-      database_name: "hprc"
-      genome_build: hg38
-      n_individuals: [ 2, 5, 10, 25, 43 ]
-      variant_type: all
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: [ "kage_with_glimpse", "pangenie", "bayestyper", "naive_genotyper_with_glimpse" ]  #, "pangenie", "kage_with_glimpse"]
-      stratification_variant_type: "svs"  # "[ "svs", "sv_insertions", "sv_deletions" ]  #" "snps", "indels"]  # ["snps", "indels", "svs", "all"]
-      stratification_type: "all"  # "[ "all", "easy", "low-mappability", "repeats", "other-difficult" ]
       individual_id: 1
       coverage: 15
       population_type: "only_variants_supported_by_individuals"
@@ -204,8 +136,6 @@ plots:
     type_limits:
       source: RealVariantSource
 
-
-
   read_coverage_tiny:
     plot_type: accuracy_vs_read_coverage
     parameters:
@@ -242,40 +172,6 @@ plots:
     type_limits:
       source: RealVariantSource
 
-  runtime_hprc2:
-    plot_type: runtime_vs_n_individuals
-    parameters:
-      size: medium6
-      database_name: "hprc"
-      genome_build: hg38
-      n_individuals: [ 2, 5, 10, 15, 22, 28, 35, 43 ]
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: ["pangenie", "kage_with_glimpse",  "bayestyper" ]
-      n_threads: 4
-      variant_type: "all"
-      individual_id: 1
-    type_limits:
-      source: RealVariantSource
-
-
-  plot2:
-    plot_type: f1_vs_n_individuals
-    parameters:
-      size: medium6
-      genome_build: hg38
-      n_individuals: [ '5', '25', '60', '125', '500', '2500']
-      variant_type: all
-      allele_frequency_snps_indels: 0.01
-      allele_frequency_svs: 0
-      method: [ "kage", "pangenie" ]
-      stratification_variant_type: ["svs", "large_indels"]   # [ "snps", "indels", "svs", "all" ]
-      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
-    type_limits:
-      source: RealVariantSource
-    layout:
-      xaxis_type: log
-
   sv_accuracy_vs_snp_rate:
     plot_type: sv_accuracy_vs_snp_rate
     parameters:
@@ -295,40 +191,6 @@ plots:
       source: RealVariantSource
     layout:
       xaxis_type: log
-
-  plot3_simulated:
-    plot_type: sv_accuracy_vs_snp_rate
-    parameters:
-      size: medium
-      genome_build: sacCer3
-      n_individuals: 50
-      allele_frequency_snps_indels: [ 0.0001, 0.001, 0.01, 0.1, 0.25, 0.5 ]
-      allele_frequency_svs: 0
-      method: [ "kage" ]
-      stratification_variant_type: "svs"
-      snp_rate: 0.01
-      small_indel_rate: 0.01
-      sv_indel_rate: 0.005
-      n_threads: 4
-    type_limits:
-      source: SimulatedPopulation
-    layout:
-      xaxis_type: log
-
-  runtime_small:
-    plot_type: runtime_vs_n_individuals
-    parameters:
-      size: small
-      genome_build: sacCer3
-      n_individuals: [2, 5, 10, 20, 40, 80, 125]
-      method: ["kage", "pangenie"]
-      n_threads: 8
-      snp_rate: 0.01
-      small_indel_rate: 0.01
-      sv_indel_rate: 0.005
-      #variant_type: "snps_indels"
-    type_limits:
-      source: SimulatedPopulation
 
   runtime:
     plot_type: runtime_vs_n_individuals
@@ -353,120 +215,8 @@ plots:
     type_limits:
       source: SimulatedPopulation
 
-  hprc:
-    plot_type: f1_vs_n_individuals
-    parameters:
-      size: big
-      genome_build: chm13
-      n_individuals: [ '10', '44']
-      variant_type: "all"
-      allele_frequency_snps_indels: 0.001
-      allele_frequency_svs: 0
-      method: [ "kage", "pangenie" ]
-      coverage: "10.0"
-      stratification_variant_type: [ "svs" ]
-      database_name: "hprc"
-      individual_id: 1
-      read_source: "real"
-    type_limits:
-      source: RealVariantSource
-    layout:
-      xaxis_type: log
-
-  roc_test:
-    plot_type: roc
-    parameters:
-        size: small
-        genome_build: chm13
-        database_name: "hprc"
-        n_individuals: 50
-        individual_id: 24
-        allele_frequency_snps_indels: 0.01
-        allele_frequency_svs: 0
-        method: ["kage", "pangenie"]
-        coverage: 30
-        variant_type: "all"
-        stratification_variant_type: ["svs", "indels"]
-        ratio_of_best_genotypes: [0.05, 0.1, 0.25, 0.5, 0.75, 1.0]
-        n_threads: 16
-    type_limits:
-        source: RealVariantSource
-
-  hprc_plot:
-    plot_type: hprc_plot
-    parameters:
-      size: big
-      genome_build: hg38
-      database_name: "hprc"
-      n_individuals: 44
-      individual_id: ["24"]
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: pangenie
-      coverage: 30
-      variant_type: all
-      stratification_variant_type: [sv_deletions, sv_insertions, svs_other]
-      stratification_type: [easy, repeats, low-mappability, other-difficult]
-      ratio_of_best_genotypes: 1.0
-      n_threads: 24
-      individual_filter: [none, only_variants_in_population]
-    type_limits:
-      source: RealVariantSource
-
-  hprc_plot_real_reads:
-    plot_type: hprc_plot
-    parameters:
-      read_source: "real"
-      size: big
-      genome_build: hg38
-      database_name: "hprc"
-      n_individuals: 44
-      individual_id: ["24"]
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: pangenie
-      coverage: 30
-      variant_type: all
-      stratification_variant_type: [sv_deletions, sv_insertions, svs_other]
-      stratification_type: [easy, repeats, low-mappability, other-difficult]
-      ratio_of_best_genotypes: 1.0
-      n_threads: 24
-      individual_filter: [none, only_variants_in_population]
-    type_limits:
-      source: RealVariantSource
-
-  hprc_plot_big:
-    plot_type: accuracy_vs_read_coverage  #f1_single_coverage
-    parameters:
-      read_source: "real"
-      size: big
-      genome_build: hg38
-      database_name: "hprc"
-      n_individuals: 44
-      individual_id: 1
-      allele_frequency_snps_indels: 0
-      allele_frequency_svs: 0
-      method: [pangenie, kage_with_glimpse, naive_genotyper_with_glimpse]
-      coverage: [0.5, 1, 7, 15]
-      variant_type: all
-      stratification_variant_type: [ svs, sv_deletions, sv_insertions ]
-      stratification_type: [ all, easy, repeats, low-mappability, other-difficult ]
-      ratio_of_best_genotypes: 1.0
-      n_threads: 16
-      individual_filter: none
-    type_limits:
-      source: RealVariantSource
-  my_plot:
-    plot_type: accuracy_vs_coverage
-    parameters:
-      coverage: [0.1, 0.5, 2, 10]
-      method: [kage_no_imputation]
-      sv_indel_rate: 0.01
-    type_limits:
-      source: SimulatedPopulation
-
   # kage2 manuscript figures
-  figure1:
+  figure1a:
     plot_type: accuracy_vs_read_coverage_single_plot
     parameters:
       size: medium6
@@ -486,7 +236,7 @@ plots:
     type_limits:
       source: RealVariantSource
 
-  figure2:
+  figure1b:
     plot_type: runtime_vs_n_individuals
     parameters:
       size: medium6
@@ -502,7 +252,7 @@ plots:
     type_limits:
       source: RealVariantSource
 
-  figure3:
+  figure2:
     plot_type: accuracy_vs_read_coverage
     parameters:
       size: medium6
@@ -522,7 +272,7 @@ plots:
     type_limits:
       source: RealVariantSource
 
-  figure4:
+  figure3a:
     plot_type: truvari_f1_vs_n_individuals
     parameters:
       size: medium6
@@ -541,7 +291,25 @@ plots:
     type_limits:
       source: RealVariantSource
 
-  figure5:
+  figure3b:
+    plot_type: recall_precision_vs_n_individuals
+    parameters:
+      size: medium6
+      database_name: "hprc"
+      genome_build: hg38
+      n_individuals: [ 2, 5, 10, 25, 43 ]
+      variant_type: all
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: [ "pangenie", "kage_with_glimpse", "bayestyper", "naive_genotyper_with_glimpse"]
+      stratification_variant_type: "svs"
+      stratification_type: "all"
+      individual_id: 1
+      coverage: 15
+      population_type: "only_variants_supported_by_individuals"
+    type_limits:
+      source: RealVariantSource
+  figure4:
     plot_type: sv_accuracy_vs_snp_rate
     parameters:
       size: medium6
@@ -611,12 +379,12 @@ plots:
       n_individuals: 43
       allele_frequency_snps_indels: 0
       allele_frequency_svs: 0
-      method: [ "kage_with_glimpse", "kage_with_glimpse_svs_imputed" ]
+      method: [ "kage_with_glimpse", "kage", "kage_svs_imputed", "kage_with_glimpse_svs_imputed" ]
       coverage: [ 1.0, 10.0, 20.0, 30.0 ]
       n_threads: 8
       individual_id: 1
       stratification_variant_type: [ "svs", "sv_deletions", "sv_insertions" ]
-      stratification_type: "all"
+      stratification_type: ["all", "easy", "low-mappability", "repeats", "other-difficult"]
     type_limits:
       source: RealVariantSource
   # The following defines different type of plots
@@ -665,6 +433,15 @@ plot_types:
     #facet_col: population_type
     #facet_col: stratification_variant_type
 
+  recall_precision_vs_n_individuals:
+    type: line
+    markers: true
+    x: TruvariPrecision
+    y: TruvariRecall
+    color: method
+    labels: n_individuals
+    #facet_col: population_type
+    #facet_col: stratification_variant_type
   sv_accuracy_vs_snp_rate:
     type: line
     x: allele_frequency_snps_indels

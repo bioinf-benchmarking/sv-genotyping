@@ -153,3 +153,23 @@ rule run_kage_with_glimpse_svs_imputed:
        "--average-coverage {wildcards.coverage} -k 31 "
        "--ignore-helper-model True --write-debug-data True --only-impute-svs True"
 
+
+rule run_kage_svs_imputed:
+   input:
+       index=FilteredPopulationWithCollapsedAlleles.path(file_ending="/kage_index.npz"),
+       population_vcf=FilteredPopulationWithCollapsedAlleles.path(),
+       reads=Reads.path(file_ending="/reads.fq.gz")
+   output:
+       results=GenotypeResults.path(method="kage_svs_imputed"),
+       node_counts=GenotypeResults.path(method="kage_svs_imputed",file_ending="/genotypes.vcf.node_counts.npy")
+   benchmark:
+       GenotypeResults.path(method="kage_svs_imputed",file_ending="/benchmark.csv")
+   threads:
+        lambda wildcards: int(wildcards.n_threads)
+   shell:
+       "kage genotype  "
+       "-i {input.index} -r {input.reads} "
+       " -o {output.results} -t {wildcards.n_threads} "
+       "--average-coverage {wildcards.coverage} -k 31 "
+       "--write-debug-data True --only-impute-svs True"
+
