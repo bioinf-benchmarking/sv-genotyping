@@ -215,6 +215,25 @@ plots:
     type_limits:
       source: SimulatedPopulation
 
+  snps_indels_accuracy:
+    plot_type: accuracy_vs_read_coverage_exact
+    parameters:
+      size: small
+      database_name: "1000genomes"
+      genome_build: hg38
+      variant_type: snps_indels
+      n_individuals: 30
+      allele_frequency_snps_indels: 0
+      allele_frequency_svs: 0
+      method: [ "pangenie", "kage", "kage_with_glimpse", "naive_genotyper_with_glimpse" ]
+      coverage: [ 0.1, 0.5, 5.0, 10.0, 15.0]
+      n_threads: 4
+      individual_id: 1
+      stratification_variant_type: ["all", "snps", "indels"]
+      stratification_type: ["all"]
+    type_limits:
+      source: RealVariantSource
+
   # kage2 manuscript figures
   figure1a:
     plot_type: accuracy_vs_read_coverage_single_plot
@@ -361,7 +380,7 @@ plots:
       allele_frequency_snps_indels: 0
       allele_frequency_svs: 0
       method: [ "pangenie", "kage_with_glimpse", "bayestyper"]
-      coverage: [ 1.0, 10.0, 20.0, 30.0 ]
+      coverage: [ 0.1, 0.5, 1.0, 10.0, 20.0, 30.0 ]
       n_threads: 8
       individual_id: [1, 2, 3, 4, 5]
       stratification_variant_type: ["svs", "sv_deletions", "sv_insertions"]
@@ -478,7 +497,14 @@ plot_types:
     facet_col: stratification_variant_type
     #markers: True
     #labels: GenotypeF1Score
-
+    
+  accuracy_vs_read_coverage_exact:
+    type: line
+    x: coverage
+    y: GenotypeF1Score
+    color: method
+    facet_row: stratification_type
+    facet_col: stratification_variant_type
   accuracy_vs_read_coverage_multiple_individuals:
     type: line
     x: coverage
