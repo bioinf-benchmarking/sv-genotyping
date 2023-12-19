@@ -25,6 +25,7 @@ jobs:
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
             apt-get update
             apt-get -y install gcc
+            sudo apt-get install make 
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements.txt
 
