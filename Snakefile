@@ -5,7 +5,7 @@ min_version("6.0")
 configfile: "config/config.yaml"
 configfile: "config/plots.yaml"
 
-workflow.use_conda = True
+#workflow.use_conda = True
 
 from snakehelp import parameters, result
 import snakehelp
