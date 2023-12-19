@@ -222,7 +222,7 @@ plots:
       database_name: "1000genomes"
       genome_build: hg38
       variant_type: snps_indels
-      n_individuals: 30
+      n_individuals: [30, 125]
       allele_frequency_snps_indels: 0
       allele_frequency_svs: 0
       method: [ "pangenie", "kage", "kage_with_glimpse", "naive_genotyper_with_glimpse" ]
@@ -230,7 +230,7 @@ plots:
       n_threads: 4
       individual_id: 1
       stratification_variant_type: ["all", "snps", "indels"]
-      stratification_type: ["all"]
+      stratification_type: "all"
     type_limits:
       source: RealVariantSource
 
@@ -497,14 +497,15 @@ plot_types:
     facet_col: stratification_variant_type
     #markers: True
     #labels: GenotypeF1Score
-    
+
   accuracy_vs_read_coverage_exact:
     type: line
     x: coverage
     y: GenotypeF1Score
     color: method
-    facet_row: stratification_type
-    facet_col: stratification_variant_type
+    facet_row: stratification_variant_type
+    facet_col: n_individuals
+
   accuracy_vs_read_coverage_multiple_individuals:
     type: line
     x: coverage
