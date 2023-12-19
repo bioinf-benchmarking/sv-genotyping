@@ -19,7 +19,7 @@ The pipeline then works roughly as follows:
 
 1) The input pangenome is optionally filtered using various techniques (see parameters below).
 2) Reads are either simulated from the truth genome or optionally downloaded from a remote sources
-3) One or more gentypers are run
+3) One or more genotypers are run
 4) Genotype calls are filtered or stratified in variuos ways
 5) Accuracy measures are computed (currently Truvari is supported, as well as some more simple naive measure)
 6) Some sort of plot is generated to visualize the results. This is done automatically based on YAML configuration.

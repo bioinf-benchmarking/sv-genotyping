@@ -282,9 +282,6 @@ class GenomeStratificationOnDataset:
     file_ending = ".bed"
 
 
-
-
-
 include: "rules/variant_simulation.smk"
 include: "rules/population_simulation.smk"
 include: "rules/read_simulation.smk"
@@ -301,18 +298,7 @@ include: "rules/delly.smk"
 include: "rules/paragraph.smk"
 include: "rules/naive_genotyper.smk"
 include: "rules/real_reads.smk"
-#include: "rules/glimpse2.smk"
 include: "rules/polaris.smk"
 
 # for plotting
 include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
-#include: "/home/ivar/dev/mapping-benchmarking/rules/plotting.smk"
-
-
-
-#include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/reference_genome.smk"
-#include: github("bioinf-benchmarking/mapping-benchmarking", "rules/read_simulation.smk", branch="master")
-#include: github("bioinf-benchmarking/mapping-benchmarking", "rules/mason.smk", branch="master")
-#include: github("bioinf-benchmarking/mapping-benchmarking", "rules/plotting.smk", branch="master")
-#include: "/home/ivargry/dev/sync/mapping-benchmarking/rules/plotting.smk"
-

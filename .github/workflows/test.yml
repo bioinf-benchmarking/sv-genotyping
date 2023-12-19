@@ -1,0 +1,34 @@
+
+name: Test
+
+on:
+  # small benchmark on push and pull request
+  push:
+    branches: ["dev", "master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Run test
+        uses: snakemake/snakemake-github-action@v1
+        with:
+          directory: '.'
+          snakefile: 'Snakefile'
+          args: '-F --cores 4 --use-conda test_kage'
+          stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+            apt-get update
+            apt-get -y install gcc
+            python -m pip install --upgrade pip setuptools wheel
+            pip install -r requirements.txt
+
+      - name: Save benchmarks results
+        run: |
+          echo "done"
+
