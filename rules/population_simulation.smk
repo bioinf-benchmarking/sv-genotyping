@@ -6,6 +6,8 @@ rule simulate_population:
     output:
         tmp =  SimulatedPopulation.path(file_ending="/unfiltered_population.tmp.vcf.gz"),
         population = SimulatedPopulation.path()
+    conda:
+        "../envs/bcftools.yml"
     shell:
         """
         python3 scripts/population_simulation.py {input.variant_source} \
