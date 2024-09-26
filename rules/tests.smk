@@ -33,3 +33,15 @@ rule test_kage:
 
 
 #rule test_kage_multiallelic:
+
+
+rule test_kage_with_glimpse:
+    input:
+        f1= "data/sacCer3/medium/0.01/0.001/0/0.3/0.8/from_pangenome/1/0.0001/0.0001/0.0/20/all_variants/1.0/simulated/150/0.2/0.001/kage_with_glimpse/1/all/all/none/1.0/all/GenotypeF1Score.txt"
+
+    output:
+        touch("test_kage_with_glimpse")
+    run:
+        with open(input[0]) as f:
+            f1 = float(f.read())
+            assert f1 > 0.0

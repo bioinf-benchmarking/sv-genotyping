@@ -124,11 +124,14 @@ rule run_kage_with_glimpse:
    threads:
         lambda wildcards: int(wildcards.n_threads)
    shell:
-       "kage genotype --glimpse {input.population_vcf} --glimpse-chunks {input.glimpse_chunks} "
+       "kage genotype --glimpse {input.population_vcf} "
+       #"--glimpse-chunks {input.glimpse_chunks} "
        "-i {input.index} -r {input.reads} "
        " -o {output.results} -t {wildcards.n_threads} "
        "--average-coverage {wildcards.coverage} -k 31 "
-       "--ignore-helper-model True --write-debug-data True"
+       "--ignore-helper-model True --write-debug-data True "
+       "--glimpse-params \"--window-size 1000000 --window-count 1000 --buffer-size 250000 --buffer-count 250\" "
+
 
 
 
